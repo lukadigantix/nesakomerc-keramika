@@ -21,8 +21,6 @@ const suggestions = [
 
 export default function SearchModal({ open, onClose }: SearchModalProps) {
   const [query, setQuery] = useState("");
-  const [mounted, setMounted] = useState(false);
-  const [visible, setVisible] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const filtered = query.trim().length > 1
@@ -34,18 +32,11 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
 
   useEffect(() => {
     if (open) {
-      setMounted(true);
-      requestAnimationFrame(() => requestAnimationFrame(() => setVisible(true)));
-      setTimeout(() => inputRef.current?.focus(), 80);
+      setTimeout(() => inputRef.current?.focus(), 50);
       document.body.style.overflow = "hidden";
     } else {
-      setVisible(false);
-      const t = setTimeout(() => {
-        setMounted(false);
-        setQuery("");
-      }, 250);
       document.body.style.overflow = "";
-      return () => clearTimeout(t);
+      setQuery("");
     }
   }, [open]);
 
@@ -57,19 +48,16 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  if (!mounted) return null;
-
   return (
     <div
-      className={`fixed inset-0 z-[90] flex flex-col items-center pt-32 px-4 transition-opacity duration-250 ${visible ? "opacity-100" : "opacity-0"}`}
+      className={`fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm flex flex-col items-center pt-32 px-4 transition-all duration-200 ${
+        open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+      }`}
       onClick={onClose}
     >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-
       {/* Modal */}
       <div
-        className={`relative w-full max-w-2xl transition-all duration-250 ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}`}
+        className={`relative w-full max-w-2xl transition-all duration-200 ${open ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Input */}
