@@ -91,7 +91,7 @@ export default function HeroSlider() {
             key={i}
             onClick={() => goTo(i)}
             aria-label={`Slajd ${i + 1}`}
-            className={`h-1.5 rounded-full transition-all duration-500 ${
+            className={`h-1.5 rounded-full transition-all duration-500 cursor-pointer ${
               i === current
                 ? "w-8 bg-white"
                 : "w-4 bg-white/40 hover:bg-white/70"

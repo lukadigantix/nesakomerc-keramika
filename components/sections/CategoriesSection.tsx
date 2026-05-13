@@ -19,7 +19,7 @@ import {
 const categories = [
   { label: "Slavine i baterije", href: "/proizvodi/baterije", icon: FaucetIcon, image: "/images/Slavine i baterije.png" },
   { label: "Sanitarija", href: "/proizvodi/sanitarije", icon: ToiletIcon, image: "/images/Sanitarija.png" },
-  { label: "Pločice i keramika", href: "/proizvodi/keramika", icon: TileIcon },
+  { label: "Pločice i keramika", href: "/proizvodi/keramika", icon: TileIcon, image: "/images/plocice.png"  },
   { label: "Tuš kabine", href: "/proizvodi/tus-kabine-i-tus-kade", icon: ShowerIcon },
   { label: "Kade", href: "/proizvodi/samostojece-kade", icon: BathtubIcon },
   { label: "Ogledala", href: "/proizvodi/klasicna-i-led-ogledala", icon: OvalMirrorIcon },
