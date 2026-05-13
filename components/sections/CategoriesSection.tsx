@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import Wrapper from "@/components/layout/Wrapper";
 import {
   FaucetIcon,
@@ -16,8 +17,8 @@ import {
 } from "@/components/icons/CategoryIcons";
 
 const categories = [
-  { label: "Slavine i baterije", href: "/proizvodi/baterije", icon: FaucetIcon },
-  { label: "Sanitarija", href: "/proizvodi/sanitarije", icon: ToiletIcon },
+  { label: "Slavine i baterije", href: "/proizvodi/baterije", icon: FaucetIcon, image: "/images/Slavine i baterije.png" },
+  { label: "Sanitarija", href: "/proizvodi/sanitarije", icon: ToiletIcon, image: "/images/Sanitarija.png" },
   { label: "Pločice i keramika", href: "/proizvodi/keramika", icon: TileIcon },
   { label: "Tuš kabine", href: "/proizvodi/tus-kabine-i-tus-kade", icon: ShowerIcon },
   { label: "Kade", href: "/proizvodi/samostojece-kade", icon: BathtubIcon },
@@ -54,17 +55,28 @@ export default function CategoriesSection() {
 
         {/* Grid */}
         <div className="grid grid-cols-6 gap-3">
-          {categories.map(({ label, href, icon: Icon }) => (
+          {categories.map(({ label, href, icon: Icon, image }) => (
             <Link
               key={href}
               href={href}
               className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border hover:border-zinc-200 hover:shadow-md bg-white transition-all duration-200 text-center aspect-[5/4] overflow-hidden"
               style={{ borderColor: "#e6e6e6" }}
             >
-              {/* Icon */}
-              <span className="relative flex items-center justify-center w-14 h-14 rounded-xl border border-zinc-100 group-hover:border-zinc-200 bg-zinc-50 group-hover:bg-zinc-100 transition-all duration-200 text-zinc-500 group-hover:text-zinc-900 shadow-sm">
-                <Icon size={26} strokeWidth={1.4} />
-              </span>
+              {/* Icon or Image */}
+              {image ? (
+                <div className="relative w-24 h-24">
+                  <Image
+                    src={image}
+                    alt={label}
+                    fill
+                    className="object-contain group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              ) : (
+                <span className="relative flex items-center justify-center w-14 h-14 rounded-xl border border-zinc-100 group-hover:border-zinc-200 bg-zinc-50 group-hover:bg-zinc-100 transition-all duration-200 text-zinc-500 group-hover:text-zinc-900 shadow-sm">
+                  <Icon size={26} strokeWidth={1.4} />
+                </span>
+              )}
               {/* Label */}
               <span className="relative text-[13px] font-medium leading-snug text-zinc-600 group-hover:text-zinc-950 transition-colors duration-200 px-3">
                 {label}
