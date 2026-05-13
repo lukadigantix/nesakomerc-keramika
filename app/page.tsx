@@ -1,5 +1,6 @@
 import HeroSlider from "@/components/sections/HeroSlider";
 import FeaturesBar from "@/components/sections/FeaturesBar";
+import CategoriesSection from "@/components/sections/CategoriesSection";
 import FeaturedProducts from "@/components/sections/FeaturedProducts";
 import NewArrivals from "@/components/sections/NewArrivals";
 import BrandsSection from "@/components/sections/BrandsSection";
@@ -10,6 +11,7 @@ export default function Home() {
     <main>
       <HeroSlider />
       <FeaturesBar />
+      <CategoriesSection />
       <FeaturedProducts />
       <NewArrivals />
       <BrandsSection />

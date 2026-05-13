@@ -205,9 +205,11 @@ export default function Navbar() {
                 <Link
                   key={category.href}
                   href={`/proizvodi/${category.href}`}
-                  className="group flex items-center gap-3 px-3 py-3 rounded-xl text-zinc-600 hover:text-white hover:bg-zinc-950 transition-all duration-150"
+                  className="group flex items-center gap-3 px-3 py-3 rounded-xl text-zinc-600 transition-all duration-150"
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = "#ed2c18"; (e.currentTarget as HTMLElement).style.color = "white"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = ""; (e.currentTarget as HTMLElement).style.color = ""; }}
                 >
-                  <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-zinc-100 group-hover:bg-white transition-colors duration-150 shrink-0 text-zinc-950 group-hover:text-zinc-950">
+                  <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-zinc-100 group-hover:bg-white/20 transition-colors duration-150 shrink-0 text-zinc-950 group-hover:text-white">
                     <category.icon size={18} strokeWidth={1.5} />
                   </span>
                   <span className="text-[15px] font-medium leading-tight">{category.label}</span>

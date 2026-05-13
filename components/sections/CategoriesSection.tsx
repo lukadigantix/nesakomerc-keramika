@@ -16,32 +16,32 @@ import {
 } from "@/components/icons/CategoryIcons";
 
 const categories = [
-  { label: "Baterije", href: "/proizvodi/baterije", icon: FaucetIcon },
-  { label: "Ormarići sa umivaonikom", href: "/proizvodi/ormarici-sa-umivaonikom", icon: VanityCabinetIcon },
-  { label: "Ormarići za lavaboe", href: "/proizvodi/ormarici-za-lavaboe", icon: SinkCabinetIcon },
-  { label: "Ogledala sa ormarićem", href: "/proizvodi/ogledala-sa-ormaricem", icon: MirrorCabinetIcon },
-  { label: "Klasična i LED Ogledala", href: "/proizvodi/klasicna-i-led-ogledala", icon: OvalMirrorIcon },
-  { label: "Vertikale", href: "/proizvodi/vertikale", icon: TowelRadiatorIcon },
-  { label: "Tuš kabine i tuš kade", href: "/proizvodi/tus-kabine-i-tus-kade", icon: ShowerIcon },
-  { label: "Samostojeće kade", href: "/proizvodi/samostojece-kade", icon: BathtubIcon },
-  { label: "Sanitarije", href: "/proizvodi/sanitarije", icon: ToiletIcon },
-  { label: "Keramika", href: "/proizvodi/keramika", icon: TileIcon },
-  { label: "Slivnici", href: "/proizvodi/slivnici", icon: DrainIcon },
+  { label: "Slavine i baterije", href: "/proizvodi/baterije", icon: FaucetIcon },
+  { label: "Sanitarija", href: "/proizvodi/sanitarije", icon: ToiletIcon },
+  { label: "Pločice i keramika", href: "/proizvodi/keramika", icon: TileIcon },
+  { label: "Tuš kabine", href: "/proizvodi/tus-kabine-i-tus-kade", icon: ShowerIcon },
+  { label: "Kade", href: "/proizvodi/samostojece-kade", icon: BathtubIcon },
+  { label: "Ogledala", href: "/proizvodi/klasicna-i-led-ogledala", icon: OvalMirrorIcon },
+  { label: "Kupatilski nameštaj", href: "/proizvodi/ormarici-sa-umivaonikom", icon: VanityCabinetIcon },
   { label: "Galanterija", href: "/proizvodi/galanterija", icon: AccessoriesIcon },
+  { label: "Vertikale", href: "/proizvodi/vertikale", icon: TowelRadiatorIcon },
+  { label: "Slivnici", href: "/proizvodi/slivnici", icon: DrainIcon },
+  { label: "Oprema za kupatilo", href: "/proizvodi/ormarici-za-lavaboe", icon: SinkCabinetIcon },
+  { label: "Ogledala sa ormarićem", href: "/proizvodi/ogledala-sa-ormaricem", icon: MirrorCabinetIcon },
 ];
 
 export default function CategoriesSection() {
   return (
-    <section className="py-24">
+    <section className="pt-24 pb-12" style={{ backgroundColor: "#fafafa" }}>
       <Wrapper>
-        {/* Heading */}
-        <div className="flex items-end justify-between mb-14">
+        {/* Header */}
+        <div className="flex items-end justify-between mb-12">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">
-              Asortiman
+              Kategorije
             </p>
             <h2 className="text-4xl font-bold text-zinc-950 leading-tight">
-              Istražite kategorije
+              Istražite asortiman
             </h2>
           </div>
           <Link
@@ -58,12 +58,15 @@ export default function CategoriesSection() {
             <Link
               key={href}
               href={href}
-              className="group flex flex-col items-center gap-5 py-8 px-4 rounded-2xl border border-zinc-100 bg-zinc-50 hover:bg-zinc-950 hover:border-zinc-950 transition-all duration-200 text-center"
+              className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border hover:border-zinc-200 hover:shadow-md bg-white transition-all duration-200 text-center aspect-[5/4] overflow-hidden"
+              style={{ borderColor: "#e6e6e6" }}
             >
-              <span className="flex items-center justify-center w-12 h-12 rounded-xl bg-white group-hover:bg-white/10 transition-colors duration-200 text-zinc-500 group-hover:text-white">
-                <Icon size={24} strokeWidth={1.5} />
+              {/* Icon */}
+              <span className="relative flex items-center justify-center w-14 h-14 rounded-xl border border-zinc-100 group-hover:border-zinc-200 bg-zinc-50 group-hover:bg-zinc-100 transition-all duration-200 text-zinc-500 group-hover:text-zinc-900 shadow-sm">
+                <Icon size={26} strokeWidth={1.4} />
               </span>
-              <span className="text-sm font-medium leading-snug text-zinc-700 group-hover:text-white transition-colors duration-200">
+              {/* Label */}
+              <span className="relative text-[13px] font-medium leading-snug text-zinc-600 group-hover:text-zinc-950 transition-colors duration-200 px-3">
                 {label}
               </span>
             </Link>

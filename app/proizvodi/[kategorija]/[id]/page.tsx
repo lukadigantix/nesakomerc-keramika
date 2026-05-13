@@ -45,7 +45,7 @@ export default async function ProizvodPage({
   const gallery = [product.image, product.image, product.image, product.image];
 
   return (
-    <div className="pt-24 pb-24 min-h-screen">
+    <div className="pt-14 pb-24 min-h-screen">
       <Wrapper>
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-zinc-400 mb-10">
