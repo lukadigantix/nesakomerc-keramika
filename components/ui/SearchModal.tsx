@@ -155,7 +155,7 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
                       key={cat.slug}
                       href={`/proizvodi/${cat.slug}`}
                       onClick={onClose}
-                      className="px-3 py-1.5 rounded-full border border-zinc-200 text-xs text-zinc-600 hover:border-zinc-950 hover:text-zinc-950 transition-all duration-150"
+                      className="px-3 py-1.5 rounded-full border border-zinc-200 text-xs text-zinc-600 hover:border-[#e11d1b] hover:text-[#e11d1b] transition-all duration-150"
                     >
                       {cat.label}
                     </Link>

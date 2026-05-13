@@ -34,7 +34,7 @@ export default function KontaktPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#fafafa" }}>
       {/* Hero */}
-      <div className="pt-52 pb-10" style={{ backgroundColor: "#ed2c18" }}>
+      <div className="pt-52 pb-10" style={{ backgroundColor: "#e11d1b" }}>
         <Wrapper>
           <div className="flex items-center gap-2 text-xs mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>
             <Link href="/" className="hover:text-white transition-colors duration-150">Početna</Link>
@@ -127,7 +127,7 @@ export default function KontaktPage() {
                 </div>
                 <button
                   type="submit"
-                  className="self-start px-6 py-3 bg-[#ed2c18] text-white text-sm font-semibold rounded-xl hover:bg-[#c9230f] transition-colors duration-150"
+                  className="self-start px-6 py-3 bg-[#e11d1b] text-white text-sm font-semibold rounded-xl hover:bg-[#c9230f] transition-colors duration-150"
                 >
                   Pošaljite upit
                 </button>

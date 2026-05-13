@@ -4,6 +4,9 @@ import { categories, products } from "@/lib/products";
 import ProductCard from "@/components/ui/ProductCard";
 import Pagination from "@/components/ui/Pagination";
 import ProductToolbar from "@/components/ui/ProductToolbar";
+import PriceRangeFilter from "@/components/ui/PriceRangeFilter";
+import ColorFilter from "@/components/ui/ColorFilter";
+import BrandFilter from "@/components/ui/BrandFilter";
 
 export const metadata = {
   title: "Svi proizvodi — Nesa Komerc Keramika",
@@ -25,7 +28,7 @@ export default async function ProizvodiPage({
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#fafafa" }}>
       {/* Hero banner */}
-      <div className="pt-52 pb-10" style={{ backgroundColor: "#ed2c18" }}>
+      <div className="pt-52 pb-10" style={{ backgroundColor: "#e11d1b" }}>
         <Wrapper>
           <div className="flex items-center gap-2 text-xs mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>
             <Link href="/" className="hover:text-white transition-colors duration-150">Početna</Link>
@@ -42,6 +45,7 @@ export default async function ProizvodiPage({
         <div className="flex gap-12">
           {/* Sidebar */}
           <aside className="w-56 shrink-0">
+            <PriceRangeFilter />
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400 mb-4">
               Kategorije
             </p>
@@ -67,6 +71,10 @@ export default async function ProizvodiPage({
                 );
               })}
             </nav>
+            <div className="mt-6 flex flex-col gap-6">
+              <BrandFilter />
+              <ColorFilter />
+            </div>
           </aside>
 
           {/* Main */}

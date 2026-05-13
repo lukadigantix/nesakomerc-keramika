@@ -50,7 +50,7 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
       <div className="flex flex-col gap-4">
         {/* Main image */}
         <div
-          className="relative w-full aspect-square rounded-2xl overflow-hidden bg-zinc-50 cursor-zoom-in group"
+          className="relative w-full aspect-[6/5] rounded-2xl overflow-hidden bg-zinc-50 cursor-zoom-in group"
           onClick={() => openLightbox(activeIndex)}
         >
           <Image
@@ -70,7 +70,7 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
         </div>
 
         {/* Thumbnails */}
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-4 gap-2">
           {images.map((img, i) => (
             <div
               key={i}

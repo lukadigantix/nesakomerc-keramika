@@ -104,7 +104,7 @@ export default function Navbar() {
               <li>
                 <Link
                   href="/"
-                  className={`text-base font-medium px-4 py-2 rounded-full transition-all duration-150 ${
+                  className={`text-sm font-medium px-4 py-2 rounded-full transition-all duration-150 ${
                     dropdownOpen || scrolled || !isHome
                       ? "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
                       : "text-white hover:bg-white/20 hover:text-white"
@@ -117,7 +117,7 @@ export default function Navbar() {
               <li onMouseEnter={handleOpen} onMouseLeave={handleClose}>
                 <Link
                   href="/proizvodi"
-                  className={`text-base font-medium px-4 py-2 rounded-full transition-all duration-150 ${
+                  className={`text-sm font-medium px-4 py-2 rounded-full transition-all duration-150 ${
                     dropdownOpen
                       ? "bg-zinc-100 text-zinc-950"
                       : scrolled || !isHome
@@ -133,7 +133,7 @@ export default function Navbar() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className={`text-base font-medium px-4 py-2 rounded-full transition-all duration-150 ${
+                    className={`text-sm font-medium px-4 py-2 rounded-full transition-all duration-150 ${
                       dropdownOpen || scrolled || !isHome
                         ? "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
                         : "text-white hover:bg-white/20 hover:text-white"
@@ -197,7 +197,7 @@ export default function Navbar() {
       >
         <Wrapper>
           <div className="py-10">
-            <p className="text-[26px] font-bold text-zinc-950 mb-7">
+            <p className="text-xl font-bold text-zinc-950 mb-7">
               Kategorije
             </p>
             <div className="grid grid-cols-4 gap-x-8 gap-y-3 pb-2">
@@ -206,13 +206,13 @@ export default function Navbar() {
                   key={category.href}
                   href={`/proizvodi/${category.href}`}
                   className="group flex items-center gap-3 px-3 py-3 rounded-xl text-zinc-600 transition-all duration-150"
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = "#ed2c18"; (e.currentTarget as HTMLElement).style.color = "white"; }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = "#e11d1b"; (e.currentTarget as HTMLElement).style.color = "white"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = ""; (e.currentTarget as HTMLElement).style.color = ""; }}
                 >
                   <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-zinc-100 group-hover:bg-white/20 transition-colors duration-150 shrink-0 text-zinc-950 group-hover:text-white">
                     <category.icon size={18} strokeWidth={1.5} />
                   </span>
-                  <span className="text-[15px] font-medium leading-tight">{category.label}</span>
+                  <span className="text-sm font-medium leading-tight">{category.label}</span>
                 </Link>
               ))}
             </div>

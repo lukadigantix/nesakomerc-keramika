@@ -18,10 +18,10 @@ const products = [
 ];
 
 const badgeColors: Record<string, string> = {
-  "Novo": "#ed2c18",
-  "Akcija": "#ed2c18",
-  "Popularno": "#ed2c18",
-  "Preporuka": "#ed2c18",
+  "Novo": "#e11d1b",
+  "Akcija": "#e11d1b",
+  "Popularno": "#e11d1b",
+  "Preporuka": "#e11d1b",
 };
 
 const CARD_WIDTH = 320;
@@ -148,7 +148,7 @@ export default function FeaturedProducts() {
                 {product.badge && (
                   <span
                     className="absolute top-3 left-3 text-[10px] font-semibold uppercase tracking-widest text-white px-2.5 py-1 rounded-full"
-                    style={{ backgroundColor: badgeColors[product.badge] ?? "#ed2c18" }}
+                    style={{ backgroundColor: badgeColors[product.badge] ?? "#e11d1b" }}
                   >
                     {product.badge}
                   </span>
@@ -183,7 +183,7 @@ export default function FeaturedProducts() {
                   {/* Add to cart */}
                   <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                    className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-white text-sm font-medium transition-colors duration-150" style={{ backgroundColor: "#ed2c18" }} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = "#c82314"} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = "#ed2c18"}
+                    className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-white text-sm font-medium transition-colors duration-150" style={{ backgroundColor: "#e11d1b" }} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = "#bf1917"} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = "#e11d1b"}
                   >
                     <ShoppingCart size={15} strokeWidth={2} />
                     Dodaj u korpu

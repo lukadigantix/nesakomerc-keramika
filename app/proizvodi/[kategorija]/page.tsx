@@ -5,6 +5,9 @@ import { categories, products, getCategoryBySlug } from "@/lib/products";
 import ProductCard from "@/components/ui/ProductCard";
 import Pagination from "@/components/ui/Pagination";
 import ProductToolbar from "@/components/ui/ProductToolbar";
+import PriceRangeFilter from "@/components/ui/PriceRangeFilter";
+import ColorFilter from "@/components/ui/ColorFilter";
+import BrandFilter from "@/components/ui/BrandFilter";
 
 export async function generateStaticParams() {
   return categories.map((cat) => ({ kategorija: cat.slug }));
@@ -47,7 +50,7 @@ export default async function KategorijaPage({
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#fafafa" }}>
       {/* Hero banner */}
-      <div className="pt-52 pb-10" style={{ backgroundColor: "#ed2c18" }}>
+      <div className="pt-52 pb-10" style={{ backgroundColor: "#e11d1b" }}>
         <Wrapper>
           <div className="flex items-center gap-2 text-xs mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>
             <Link href="/" className="hover:text-white transition-colors duration-150">Početna</Link>
@@ -67,20 +70,11 @@ export default async function KategorijaPage({
           {/* Filters sidebar */}
           <aside className="w-56 shrink-0 flex flex-col gap-8">
 
-            {/* Cena */}
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400 mb-4">Cena</p>
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-2">
-                  <input type="number" placeholder="Od" className="w-full h-9 px-3 rounded-lg border border-zinc-200 text-sm text-zinc-950 focus:outline-none focus:border-zinc-400 bg-white" />
-                  <span className="text-zinc-300 text-sm">—</span>
-                  <input type="number" placeholder="Do" className="w-full h-9 px-3 rounded-lg border border-zinc-200 text-sm text-zinc-950 focus:outline-none focus:border-zinc-400 bg-white" />
-                </div>
-                <button className="h-9 w-full rounded-lg border border-zinc-200 text-sm text-zinc-600 hover:border-zinc-950 hover:text-zinc-950 transition-all duration-150">
-                  Primeni
-                </button>
-              </div>
-            </div>
+            <PriceRangeFilter />
+
+            <BrandFilter />
+
+            <ColorFilter />
 
             {/* Brend */}
             <div>

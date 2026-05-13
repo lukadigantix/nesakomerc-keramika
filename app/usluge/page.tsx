@@ -35,7 +35,7 @@ export default function UslugePage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#fafafa" }}>
       {/* Hero */}
-      <div className="pt-52 pb-10" style={{ backgroundColor: "#ed2c18" }}>
+      <div className="pt-52 pb-10" style={{ backgroundColor: "#e11d1b" }}>
         <Wrapper>
           <div className="flex items-center gap-2 text-xs mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>
             <Link href="/" className="hover:text-white transition-colors duration-150">Početna</Link>
@@ -100,7 +100,7 @@ export default function UslugePage() {
                 key={naziv}
                 className="flex flex-col gap-4 p-6 bg-white rounded-2xl border border-zinc-100 group hover:border-zinc-200 transition-colors duration-150"
               >
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-zinc-50 text-zinc-400 group-hover:bg-[#ed2c18] group-hover:text-white transition-colors duration-200">
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-zinc-50 text-zinc-400 group-hover:bg-[#e11d1b] group-hover:text-white transition-colors duration-200">
                   <Icon size={22} strokeWidth={1.5} />
                 </div>
                 <div className="flex flex-col gap-2">
@@ -126,7 +126,7 @@ export default function UslugePage() {
             </div>
             <Link
               href="/kontakt"
-              className="px-6 py-3 bg-[#ed2c18] text-white text-sm font-semibold rounded-xl hover:bg-[#c9230f] transition-colors duration-150"
+              className="px-6 py-3 bg-[#e11d1b] text-white text-sm font-semibold rounded-xl hover:bg-[#c9230f] transition-colors duration-150"
             >
               Kontakt
             </Link>

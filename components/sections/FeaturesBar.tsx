@@ -1,4 +1,4 @@
-import { Truck, Tag, CreditCard, Mail } from "lucide-react";
+import { Truck, Tag, CreditCard } from "lucide-react";
 import Wrapper from "@/components/layout/Wrapper";
 
 const features = [
@@ -17,24 +17,19 @@ const features = [
     label: "Načini plaćanja",
     description: "Gotovina, kartica ili na rate bez kamate",
   },
-  {
-    icon: Mail,
-    label: "Newsletter prijava",
-    description: "Budite prvi koji saznaju za nove akcije i novitete",
-  },
 ];
 
 export default function FeaturesBar() {
   return (
     <section className="border-b border-zinc-100">
       <Wrapper>
-        <div className="grid grid-cols-4 divide-x divide-zinc-100 py-12">
+        <div className="grid grid-cols-3 divide-x divide-zinc-100 py-12">
           {features.map(({ icon: Icon, label, description }) => (
             <div
               key={label}
-              className="flex flex-col items-center gap-4 px-10 text-center group cursor-default"
+              className="flex items-center gap-5 px-10 group cursor-default"
             >
-              <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-zinc-50 text-zinc-400 transition-colors duration-200 group-hover:bg-[#ed2c18] group-hover:text-white">
+              <div className="flex items-center justify-center w-14 h-14 shrink-0 rounded-2xl bg-zinc-50 text-zinc-400 transition-colors duration-200 group-hover:bg-[#e11d1b] group-hover:text-white">
                 <Icon size={24} strokeWidth={1.5} />
               </div>
               <div className="flex flex-col gap-1">

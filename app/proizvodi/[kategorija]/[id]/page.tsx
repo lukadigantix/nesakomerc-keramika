@@ -1,8 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Truck, RefreshCw, ShieldCheck } from "lucide-react";
 import Wrapper from "@/components/layout/Wrapper";
 import ProductGallery from "@/components/ui/ProductGallery";
+import ProductTabs from "@/components/ui/ProductTabs";
+import QuantitySelector from "@/components/ui/QuantitySelector";
+import ProductCard from "@/components/ui/ProductCard";
 import { categories, products, getCategoryBySlug, getProductById, getProductsByCategory } from "@/lib/products";
 
 export async function generateStaticParams() {
@@ -39,16 +43,16 @@ export default async function ProizvodPage({
 
   const related = getProductsByCategory(kategorija)
     .filter((p) => p.id !== product.id)
-    .slice(0, 4);
+    .slice(0, 5);
 
   // Gallery — same image repeated for placeholder
   const gallery = [product.image, product.image, product.image, product.image];
 
   return (
-    <div className="pt-14 pb-24 min-h-screen">
+    <div className="pt-28 pb-24 min-h-screen">
       <Wrapper>
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-zinc-400 mb-10">
+        <div className="flex items-center gap-2 text-xs text-zinc-400 mb-8">
           <Link href="/" className="hover:text-zinc-950 transition-colors duration-150">Početna</Link>
           <span>/</span>
           <Link href="/proizvodi" className="hover:text-zinc-950 transition-colors duration-150">Svi proizvodi</Link>
@@ -76,6 +80,11 @@ export default async function ProizvodPage({
               <h1 className="text-3xl font-bold text-zinc-950 leading-tight">
                 {product.name}
               </h1>
+              {product.description && (
+                <p className="mt-3 text-sm text-zinc-500 leading-relaxed">
+                  {product.description}
+                </p>
+              )}
             </div>
 
             {/* Price */}
@@ -87,87 +96,66 @@ export default async function ProizvodPage({
             {/* Divider */}
             <hr className="border-zinc-100" />
 
-            {/* Specs placeholder */}
-            <div className="flex flex-col gap-3">
-              <div className="flex justify-between text-sm py-2 border-b border-zinc-50">
-                <span className="text-zinc-400">Šifra artikla</span>
-                <span className="text-zinc-950 font-medium">NK-{String(product.id).padStart(5, "0")}</span>
+            {/* Specs */}
+            <div className="flex flex-col divide-y divide-zinc-100">
+              <div className="flex justify-between items-center py-3.5">
+                <span className="text-sm text-zinc-400">Šifra artikla</span>
+                <span className="text-sm font-semibold text-zinc-950">NK-{String(product.id).padStart(5, "0")}</span>
               </div>
-              <div className="flex justify-between text-sm py-2 border-b border-zinc-50">
-                <span className="text-zinc-400">Dostupnost</span>
-                <span className="flex items-center gap-1.5 text-emerald-600 font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+              <div className="flex justify-between items-center py-3.5">
+                <span className="text-sm text-zinc-400">Dostupnost</span>
+                <span className="flex items-center gap-2 text-sm font-semibold text-emerald-600">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                   Na stanju
                 </span>
               </div>
-              <div className="flex justify-between text-sm py-2 border-b border-zinc-50">
-                <span className="text-zinc-400">Kategorija</span>
-                <Link href={`/proizvodi/${kategorija}`} className="text-zinc-950 font-medium hover:underline">
+              <div className="flex justify-between items-center py-3.5">
+                <span className="text-sm text-zinc-400">Kategorija</span>
+                <Link href={`/proizvodi/${kategorija}`} className="text-sm font-semibold text-zinc-950 hover:underline">
                   {category.label}
                 </Link>
               </div>
-              <div className="flex justify-between text-sm py-2 border-b border-zinc-50">
-                <span className="text-zinc-400">Isporuka</span>
-                <span className="text-zinc-950 font-medium">2 — 5 radnih dana</span>
+              <div className="flex justify-between items-center py-3.5">
+                <span className="text-sm text-zinc-400">Isporuka</span>
+                <span className="text-sm font-semibold text-zinc-950">2 — 5 radnih dana</span>
               </div>
             </div>
 
             {/* CTA buttons */}
-            <div className="flex flex-col gap-3 mt-2">
-              <button className="h-13 rounded-full bg-zinc-950 text-white text-sm font-semibold hover:bg-zinc-800 transition-colors duration-150">
-                Dodaj u korpu
-              </button>
-              <button className="h-13 rounded-full border border-zinc-200 text-zinc-700 text-sm font-medium hover:border-zinc-950 hover:text-zinc-950 transition-all duration-150">
-                Upit za cenu
-              </button>
+            <QuantitySelector />
+
+            {/* Trust badges */}
+            <div className="flex flex-col gap-3 pt-1">
+              {[
+                { icon: <Truck size={16} strokeWidth={1.8} />, text: "Besplatna dostava za narudžbine iznad 6.000 RSD" },
+                { icon: <RefreshCw size={16} strokeWidth={1.8} />, text: "Povrat u roku od 14 dana" },
+                { icon: <ShieldCheck size={16} strokeWidth={1.8} />, text: "Sigurna online kupovina" },
+              ].map(({ icon, text }) => (
+                <div key={text} className="flex items-center gap-3 text-sm text-zinc-500">
+                  <span style={{ color: "#e11d1b" }}>{icon}</span>
+                  {text}
+                </div>
+              ))}
             </div>
 
-            {/* Delivery note */}
-            <p className="text-xs text-zinc-400 text-center">
-              Besplatna isporuka za porudžbine iznad 10.000 RSD
-            </p>
-
-            {/* Tehničke karakteristike */}
-            <div className="border-t border-zinc-100 pt-6">
-              <h2 className="text-sm font-semibold text-zinc-950 mb-4">Tehničke karakteristike</h2>
-              <div className="flex flex-col">
-                {[
-                  ["Materijal", "Nerđajući čelik / keramika"],
-                  ["Završna obrada", "Mat / Sjajni hrom"],
-                  ["Garancija", "2 godine"],
-                  ["Zemlja porekla", "EU"],
-                  ["Težina", "Na upit"],
-                  ["Dimenzije", "Na upit"],
-                ].map(([key, val]) => (
-                  <div key={key} className="flex justify-between text-sm py-2.5 border-b border-zinc-100">
-                    <span className="text-zinc-400">{key}</span>
-                    <span className="text-zinc-950 font-medium">{val}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Tehničke karakteristike — moved to tabs below */}
           </div>
         </div>
 
-        {/* Description */}
-        <div className="mt-20">
-          <h2 className="text-xl font-bold text-zinc-950 mb-5">Opis proizvoda</h2>
-          <div className="max-w-2xl flex flex-col gap-4 text-sm text-zinc-500 leading-relaxed">
-            <p>
-              {product.name} je premium proizvod iz kategorije {category.label.toLowerCase()}, dizajniran
-              za modernu kupatilsku estetiku i dugotrajnu upotrebu. Izrađen od visokokvalitetnih
-              materijala koji garantuju otpornost na vlagu, koroziju i svakodnevno habanje.
-            </p>
-            <p>
-              Zahvaljujući pažljivo isplaniranim dimenzijama i intuitivnoj ugradnji, ovaj proizvod
-              se lako integriše u svaki kupatilski prostor — bez obzira na stil i veličinu.
-            </p>
-            <p>
-              Svaki komad prolazi kroz rigoroznu kontrolu kvaliteta pre isporuke, uz garanciju
-              proizvođača i punu tehničku podršku tima Nesa Komerc Keramika.
-            </p>
-          </div>
-        </div>
+        {/* Tabs: Opis + Tehničke karakteristike */}
+        <ProductTabs
+          description={product.description ?? ""}
+          productName={product.name}
+          categoryLabel={category.label}
+          specs={[
+            ["Materijal", "Nerđajući čelik / keramika"],
+            ["Završna obrada", "Mat / Sjajni hrom"],
+            ["Garancija", "2 godine"],
+            ["Zemlja porekla", "EU"],
+            ["Težina", "Na upit"],
+            ["Dimenzije", "Na upit"],
+          ]}
+        />
 
         {/* Related products */}
         {related.length > 0 && (
@@ -186,28 +174,13 @@ export default async function ProizvodPage({
                 Svi iz kategorije
               </Link>
             </div>
-            <div className="grid grid-cols-4 gap-5">
+            <div className="grid grid-cols-5 gap-5">
               {related.map((p) => (
-                <Link
+                <ProductCard
                   key={p.id}
+                  product={p}
                   href={`/proizvodi/${p.categorySlug}/${p.id}`}
-                  className="group flex flex-col rounded-2xl overflow-hidden border border-zinc-100 hover:border-zinc-200 hover:shadow-lg transition-all duration-300"
-                >
-                  <div className="relative w-full h-52 bg-zinc-50 overflow-hidden">
-                    <Image
-                      src={p.image}
-                      alt={p.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5 p-4">
-                    <h3 className="text-sm font-semibold text-zinc-950 leading-snug group-hover:text-zinc-600 transition-colors duration-150">
-                      {p.name}
-                    </h3>
-                    <p className="text-sm font-semibold text-zinc-950">{p.price}</p>
-                  </div>
-                </Link>
+                />
               ))}
             </div>
           </div>

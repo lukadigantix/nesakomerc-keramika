@@ -5,12 +5,20 @@ import Image from "next/image";
 import { Heart, ShoppingCart, PackageCheck } from "lucide-react";
 import type { Product } from "@/lib/products";
 
+const badgeColors: Record<string, { bg: string; text: string }> = {
+  Novo:    { bg: "#2563eb", text: "#fff" },
+  Akcija:  { bg: "#e11d1b", text: "#fff" },
+  Popular: { bg: "#f59e0b", text: "#fff" },
+  Outlet:  { bg: "#16a34a", text: "#fff" },
+};
+
 interface Props {
   product: Product;
   href: string;
+  badge?: string;
 }
 
-export default function ProductCard({ product, href }: Props) {
+export default function ProductCard({ product, href, badge }: Props) {
   return (
     <Link
       href={href}
@@ -25,6 +33,18 @@ export default function ProductCard({ product, href }: Props) {
           fill
           className="object-cover will-change-transform group-hover:scale-105 transition-transform duration-500"
         />
+        {/* Badge */}
+        {badge && (() => {
+          const style = badgeColors[badge] ?? { bg: "#6b7280", text: "#fff" };
+          return (
+            <span
+              className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide z-10"
+              style={{ backgroundColor: style.bg, color: style.text }}
+            >
+              {badge}
+            </span>
+          );
+        })()}
         {/* Favorite button */}
         <button
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
@@ -52,9 +72,9 @@ export default function ProductCard({ product, href }: Props) {
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
             className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-white text-sm font-medium transition-colors duration-150"
-            style={{ backgroundColor: "#ed2c18" }}
-            onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.backgroundColor = "#c82314"}
-            onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.backgroundColor = "#ed2c18"}
+            style={{ backgroundColor: "#e11d1b" }}
+            onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.backgroundColor = "#bf1917"}
+            onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.backgroundColor = "#e11d1b"}
           >
             <ShoppingCart size={15} strokeWidth={2} />
             Dodaj u korpu

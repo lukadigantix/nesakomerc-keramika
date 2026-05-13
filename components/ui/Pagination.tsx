@@ -49,7 +49,7 @@ export default function Pagination({ currentPage, totalPages, buildHref }: Props
           <span
             key={p}
             className={`${btnBase} border-transparent text-white`}
-            style={{ backgroundColor: "#ed2c18" }}
+            style={{ backgroundColor: "#e11d1b" }}
           >
             {p}
           </span>
