@@ -29,7 +29,7 @@ export default function FeaturesBar() {
               key={label}
               className="flex items-center gap-5 px-10 group cursor-default"
             >
-              <div className="flex items-center justify-center w-14 h-14 shrink-0 rounded-2xl bg-zinc-50 text-zinc-400 transition-colors duration-200 group-hover:bg-[#e11d1b] group-hover:text-white">
+              <div className="flex items-center justify-center w-14 h-14 shrink-0 rounded-2xl bg-[#e11d1b] text-white transition-colors duration-200 group-hover:bg-[#bf1917]">
                 <Icon size={24} strokeWidth={1.5} />
               </div>
               <div className="flex flex-col gap-1">

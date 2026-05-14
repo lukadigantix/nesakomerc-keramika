@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 
 const slides = [
-  { src: "/images/img1.png", alt: "Nesa Komerc - Keramika" },
-  { src: "/images/img2.png", alt: "Nesa Komerc - Keramika" },
-  { src: "/images/img3.png", alt: "Nesa Komerc - Keramika" },
-  { src: "/images/img4.png", alt: "Nesa Komerc - Keramika" },
-  { src: "/images/img5.png", alt: "Nesa Komerc - Keramika" },
+  { src: "/images/card1.png", alt: "Nesa Komerc - Keramika" },
+  { src: "/images/card2.png", alt: "Nesa Komerc - Keramika" },
+  { src: "/images/card3.png", alt: "Nesa Komerc - Keramika" },
+  { src: "/images/card4.png", alt: "Nesa Komerc - Keramika" },
 ];
 
 const INTERVAL = 6000;
@@ -41,7 +41,7 @@ export default function HeroSlider() {
   }, [next]);
 
   return (
-    <section className="relative h-screen w-full overflow-hidden">
+    <section className="relative h-[80vh] w-full overflow-hidden">
       {/* Slike */}
       {slides.map((slide, i) => {
         const isActive = i === current;
@@ -69,18 +69,18 @@ export default function HeroSlider() {
           Svaki detalj je pažljivo odabran
         </h1>
         <div className="flex items-center gap-4">
-          <a
+          <Link
             href="/proizvodi"
-            className="px-8 py-3 rounded-full border border-white text-sm font-semibold tracking-widest uppercase text-white hover:bg-white hover:text-zinc-950 transition-colors duration-200"
+            className="px-8 py-3 rounded-full border border-white text-sm font-semibold tracking-widest uppercase text-white hover:bg-[#e11d1b] hover:border-[#e11d1b] transition-colors duration-200"
           >
             Pogledaj proizvode
-          </a>
-          <a
+          </Link>
+          <Link
             href="/kontakt"
-            className="px-8 py-3 rounded-full border border-white text-sm font-semibold tracking-widest uppercase text-white hover:bg-white hover:text-zinc-950 transition-colors duration-200"
+            className="px-8 py-3 rounded-full border border-white text-sm font-semibold tracking-widest uppercase text-white hover:bg-[#e11d1b] hover:border-[#e11d1b] transition-colors duration-200"
           >
             Kontaktirajte nas
-          </a>
+          </Link>
         </div>
       </div>
 

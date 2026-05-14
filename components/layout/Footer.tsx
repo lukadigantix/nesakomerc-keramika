@@ -55,7 +55,8 @@ export default function Footer() {
               />
               <button
                 type="submit"
-                className="h-11 px-6 rounded-full bg-white text-zinc-950 text-sm font-semibold hover:bg-zinc-200 transition-colors duration-150 shrink-0"
+                style={{ backgroundColor: "#e11d1b" }}
+                className="h-11 px-6 rounded-full text-white text-sm font-semibold hover:opacity-90 transition-all duration-300 shrink-0"
               >
                 Prijavi se
               </button>
@@ -71,11 +72,11 @@ export default function Footer() {
           <div className="col-span-3 flex flex-col gap-6">
             <Link href="/">
               <Image
-                src="/logo.png"
+                src="/nesa-komerc-logo.svg"
                 alt="Nesa Komerc Keramika"
-                width={180}
-                height={54}
-                className="h-14 w-auto brightness-0 invert"
+                width={270}
+                height={81}
+                className="h-20 w-auto"
               />
             </Link>
             <p className="text-sm text-zinc-400 leading-relaxed">
@@ -107,8 +108,8 @@ export default function Footer() {
                 </span>
                 info@nesakomerc.rs
               </a>
-              <div className="flex items-start gap-3 text-sm text-zinc-400">
-                <span className="flex items-center justify-center w-8 h-8 rounded-full border border-zinc-800 shrink-0 mt-0.5">
+              <div className="flex items-center gap-3 text-sm text-zinc-400">
+                <span className="flex items-center justify-center w-8 h-8 rounded-full border border-zinc-800 shrink-0">
                   <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />

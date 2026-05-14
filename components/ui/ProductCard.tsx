@@ -3,30 +3,34 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Heart, ShoppingCart, PackageCheck } from "lucide-react";
-import type { Product } from "@/lib/products";
 
-const badgeColors: Record<string, { bg: string; text: string }> = {
-  Novo:    { bg: "#2563eb", text: "#fff" },
-  Akcija:  { bg: "#e11d1b", text: "#fff" },
-  Popular: { bg: "#f59e0b", text: "#fff" },
-  Outlet:  { bg: "#16a34a", text: "#fff" },
-};
-
-interface Props {
-  product: Product;
-  href: string;
-  badge?: string;
+interface CardProduct {
+  id: number;
+  name: string;
+  category: string;
+  price: string;
+  image: string;
 }
 
-export default function ProductCard({ product, href, badge }: Props) {
+interface Props {
+  product: CardProduct;
+  href: string;
+  badge?: string | null;
+  stock?: number;
+  className?: string;
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+}
+
+export default function ProductCard({ product, href, badge, stock, className, onClick }: Props) {
   return (
     <Link
       href={href}
-      className="group flex flex-col rounded-2xl border hover:border-zinc-200 hover:shadow-md transition-all duration-300 isolate bg-white"
+      onClick={onClick}
+      className={`group flex flex-col rounded-2xl border hover:border-zinc-200 hover:shadow-md transition-all duration-300 isolate bg-white${className ? ` ${className}` : ""}`}
       style={{ borderColor: "#e6e6e6" }}
     >
       {/* Image */}
-      <div className="relative w-full h-56 bg-zinc-50 [clip-path:inset(0_0_0_0_round_1rem_1rem_0_0)]">
+      <div className="relative w-full h-78 bg-zinc-50 [clip-path:inset(0_0_0_0_round_1rem_1rem_0_0)]">
         <Image
           src={product.image}
           alt={product.name}
@@ -34,17 +38,14 @@ export default function ProductCard({ product, href, badge }: Props) {
           className="object-cover will-change-transform group-hover:scale-105 transition-transform duration-500"
         />
         {/* Badge */}
-        {badge && (() => {
-          const style = badgeColors[badge] ?? { bg: "#6b7280", text: "#fff" };
-          return (
-            <span
-              className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide z-10"
-              style={{ backgroundColor: style.bg, color: style.text }}
-            >
-              {badge}
-            </span>
-          );
-        })()}
+        {badge && (
+          <span
+            className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide z-10 text-white"
+            style={{ backgroundColor: "#e11d1b" }}
+          >
+            {badge}
+          </span>
+        )}
         {/* Favorite button */}
         <button
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
@@ -66,7 +67,7 @@ export default function ProductCard({ product, href, badge }: Props) {
         <div className="mt-auto pt-4">
           <div className="flex items-center gap-1.5 mb-3">
             <PackageCheck size={13} className="text-emerald-500" strokeWidth={2} />
-            <span className="text-xs font-medium text-emerald-600">Na lageru</span>
+            <span className="text-xs font-medium text-emerald-600">Na lageru{stock != null ? ` · ${stock} kom` : ""}</span>
           </div>
           <p className="text-xl font-semibold text-zinc-950">{product.price}</p>
           <button

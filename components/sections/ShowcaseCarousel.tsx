@@ -10,28 +10,28 @@ const GAP = 16;
 
 const cards = [
   {
-    title: "Baterije i slavine",
-    subtitle: "Grohe, Hansgrohe, Ravak i više",
-    cta: { label: "Pogledaj", href: "/proizvodi/baterije" },
-    image: "/images/card1.png",
+    title: "Mesečna akcija",
+    subtitle: "Popusti do 40% na odabrane proizvode",
+    cta: { label: "Pogledaj akciju", href: "/akcija" },
+    image: "/images/c1.png",
   },
   {
-    title: "Tuš kabine i kade",
-    subtitle: "Moderni sistemi tuširanje za svaki prostor",
-    cta: { label: "Pogledaj", href: "/proizvodi/tus-kabine-i-tus-kade" },
-    image: "/images/card2.png",
+    title: "Grohe kolekcija",
+    subtitle: "Premium armature za moderno kupatilo",
+    cta: { label: "Istraži", href: "/proizvodi/baterije" },
+    image: "/images/c2.png",
   },
   {
-    title: "Sanitarije",
-    subtitle: "Villeroy & Boch, Duravit, Geberit",
-    cta: { label: "Pogledaj", href: "/proizvodi/sanitarije" },
-    image: "/images/card3.png",
+    title: "Villeroy & Boch",
+    subtitle: "Luksuzna sanitarija za vaš dom",
+    cta: { label: "Istraži", href: "/proizvodi/sanitarije" },
+    image: "/images/c3.png",
   },
   {
-    title: "Keramika",
-    subtitle: "Zidne i podne pločice od vodećih proizvođača",
-    cta: { label: "Pogledaj", href: "/proizvodi/keramika" },
-    image: "/images/card4.png",
+    title: "Novo u ponudi",
+    subtitle: "Najnovije kolekcije tuševa i kada",
+    cta: { label: "Pogledaj novo", href: "/proizvodi" },
+    image: "/images/c4.png",
   },
 ];
 
@@ -115,7 +115,8 @@ export default function ShowcaseCarousel() {
                   <Link
                     href={card.cta.href}
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex self-start px-5 py-2.5 rounded-full bg-white text-zinc-950 text-sm font-semibold hover:bg-zinc-100 transition-colors duration-150"
+                    className="inline-flex self-start px-5 py-2.5 rounded-full text-white text-sm font-semibold hover:opacity-90 transition-colors duration-150"
+                    style={{ backgroundColor: "#e11d1b" }}
                   >
                     {card.cta.label}
                   </Link>

@@ -89,10 +89,10 @@ export default function Navbar() {
             {/* Logo — levo */}
             <Link href="/" className="shrink-0">
               <Image
-                src="/logo.png"
+                src="/nesa-komerc-logo.svg"
                 alt="Nesa Komerc - Keramika"
-                width={60}
-                height={36}
+                width={108}
+                height={65}
                 className="object-contain"
                 priority
               />
@@ -104,7 +104,7 @@ export default function Navbar() {
               <li>
                 <Link
                   href="/"
-                  className={`text-sm font-medium px-4 py-2 rounded-full transition-all duration-150 ${
+                  className={`text-[15px] font-medium px-4 py-2 rounded-full transition-all duration-150 ${
                     dropdownOpen || scrolled || !isHome
                       ? "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
                       : "text-white hover:bg-white/20 hover:text-white"
@@ -117,7 +117,7 @@ export default function Navbar() {
               <li onMouseEnter={handleOpen} onMouseLeave={handleClose}>
                 <Link
                   href="/proizvodi"
-                  className={`text-sm font-medium px-4 py-2 rounded-full transition-all duration-150 ${
+                  className={`text-[15px] font-medium px-4 py-2 rounded-full transition-all duration-150 ${
                     dropdownOpen
                       ? "bg-zinc-100 text-zinc-950"
                       : scrolled || !isHome
@@ -133,7 +133,7 @@ export default function Navbar() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className={`text-sm font-medium px-4 py-2 rounded-full transition-all duration-150 ${
+                    className={`text-[15px] font-medium px-4 py-2 rounded-full transition-all duration-150 ${
                       dropdownOpen || scrolled || !isHome
                         ? "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
                         : "text-white hover:bg-white/20 hover:text-white"
@@ -149,36 +149,36 @@ export default function Navbar() {
             <div className="ml-auto flex items-center gap-1">
               <button
                 onClick={() => setSearchOpen(true)}
-                className={`flex items-center justify-center w-9 h-9 rounded-full transition-all duration-150 ${
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-150 ${
                   dropdownOpen || scrolled || !isHome
                     ? "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
                     : "text-white hover:bg-white/20"
                 }`}
                 aria-label="Pretraga"
               >
-                <Search size={20} strokeWidth={1.5} />
+                <Search size={22} strokeWidth={1.5} />
               </button>
               <Link
                 href="/nalog"
-                className={`flex items-center justify-center w-9 h-9 rounded-full transition-all duration-150 ${
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-150 ${
                   dropdownOpen || scrolled || !isHome
                     ? "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
                     : "text-white hover:bg-white/20"
                 }`}
                 aria-label="Nalog"
               >
-                <User size={20} strokeWidth={1.5} />
+                <User size={22} strokeWidth={1.5} />
               </Link>
               <Link
                 href="/korpa"
-                className={`flex items-center justify-center w-9 h-9 rounded-full transition-all duration-150 ${
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-150 ${
                   dropdownOpen || scrolled || !isHome
                     ? "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
                     : "text-white hover:bg-white/20"
                 }`}
                 aria-label="Korpa"
               >
-                <ShoppingBag size={20} strokeWidth={1.5} />
+                <ShoppingBag size={22} strokeWidth={1.5} />
               </Link>
             </div>
           </nav>
