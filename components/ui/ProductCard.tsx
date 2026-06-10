@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { Heart, ShoppingCart, PackageCheck } from "lucide-react";
+import Image from "next/image";import { useState } from "react";import { Heart, ShoppingCart, PackageCheck, Check } from "lucide-react";
+import { useCart } from "@/lib/cart";
 
 interface CardProduct {
-  id: number;
+  id: string;
   name: string;
   category: string;
   price: string;
   image: string;
+  sku?: string;
 }
 
 interface Props {
@@ -22,6 +23,8 @@ interface Props {
 }
 
 export default function ProductCard({ product, href, badge, stock, className, onClick }: Props) {
+  const { addItem } = useCart();
+  const [added, setAdded] = useState(false);
   return (
     <Link
       href={href}
@@ -30,12 +33,12 @@ export default function ProductCard({ product, href, badge, stock, className, on
       style={{ borderColor: "#e6e6e6" }}
     >
       {/* Image */}
-      <div className="relative w-full h-78 bg-zinc-50 [clip-path:inset(0_0_0_0_round_1rem_1rem_0_0)]">
+      <div className="relative w-full h-78 bg-white [clip-path:inset(0_0_0_0_round_1rem_1rem_0_0)]">
         <Image
           src={product.image}
           alt={product.name}
           fill
-          className="object-cover will-change-transform group-hover:scale-105 transition-transform duration-500"
+          className="object-contain p-3 will-change-transform group-hover:scale-105 transition-transform duration-500"
         />
         {/* Badge */}
         {badge && (
@@ -71,14 +74,34 @@ export default function ProductCard({ product, href, badge, stock, className, on
           </div>
           <p className="text-xl font-semibold text-zinc-950">{product.price}</p>
           <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-white text-sm font-medium transition-colors duration-150"
-            style={{ backgroundColor: "#e11d1b" }}
-            onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.backgroundColor = "#bf1917"}
-            onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.backgroundColor = "#e11d1b"}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (stock !== undefined && stock <= 0) return;
+              addItem({
+                id: product.id,
+                name: product.name,
+                category: product.category,
+                price: product.price,
+                image: product.image,
+                sku: product.sku,
+              });
+              setAdded(true);
+              setTimeout(() => setAdded(false), 1800);
+            }}
+            disabled={stock !== undefined && stock <= 0}
+            className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-white text-sm font-medium transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: added ? "#16a34a" : stock !== undefined && stock <= 0 ? "#a1a1aa" : "#e11d1b" }}
+            onMouseEnter={(e) => { if (!added && !(stock !== undefined && stock <= 0)) (e.currentTarget as HTMLElement).style.backgroundColor = "#bf1917"; }}
+            onMouseLeave={(e) => { if (!added && !(stock !== undefined && stock <= 0)) (e.currentTarget as HTMLElement).style.backgroundColor = "#e11d1b"; }}
           >
-            <ShoppingCart size={15} strokeWidth={2} />
-            Dodaj u korpu
+            {added ? (
+              <><Check size={15} strokeWidth={2.5} /> Dodato!</>
+            ) : stock !== undefined && stock <= 0 ? (
+              <><ShoppingCart size={15} strokeWidth={2} /> Nema na lageru</>
+            ) : (
+              <><ShoppingCart size={15} strokeWidth={2} /> Dodaj u korpu</>
+            )}
           </button>
         </div>
       </div>

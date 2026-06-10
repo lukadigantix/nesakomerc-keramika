@@ -35,14 +35,14 @@ export default function UslugePage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#fafafa" }}>
       {/* Hero */}
-      <div className="pt-52 pb-10" style={{ backgroundColor: "#e11d1b" }}>
+      <div className="pt-28 pb-8" style={{ background: "linear-gradient(to right, #e11d1b, #f97316)" }}>
         <Wrapper>
           <div className="flex items-center gap-2 text-xs mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>
             <Link href="/" className="hover:text-white transition-colors duration-150">Početna</Link>
             <span>/</span>
             <span className="text-white">Usluge</span>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">Usluge</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Usluge</h1>
           <p className="text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>
             Sve što vam treba na jednom mestu — od izbora do ugradnje
           </p>
@@ -50,10 +50,10 @@ export default function UslugePage() {
       </div>
 
       {/* Image + intro */}
-      <div className="py-16 border-b border-zinc-100 bg-white">
+      <div className="py-12 lg:py-16 border-b border-zinc-100 bg-white">
         <Wrapper>
-          <div className="grid grid-cols-12 gap-10 items-center">
-            <div className="col-span-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+            <div className="lg:col-span-6">
               <div className="relative w-full aspect-video overflow-hidden rounded-2xl bg-zinc-100">
                 <Image
                   src="/images/usluge.png"
@@ -64,11 +64,11 @@ export default function UslugePage() {
                 />
               </div>
             </div>
-            <div className="col-span-5 col-start-8 flex flex-col gap-5">
+            <div className="lg:col-span-5 lg:col-start-8 flex flex-col gap-5">
               <p className="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400">
                 Zašto mi?
               </p>
-              <h2 className="text-3xl font-bold text-zinc-950 leading-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold text-zinc-950 leading-tight">
                 Profesionalna usluga <br />
                 <span className="text-zinc-400 font-light text-2xl">od A do Ž</span>
               </h2>
@@ -89,12 +89,12 @@ export default function UslugePage() {
       </div>
 
       {/* Services grid */}
-      <div className="py-16">
+      <div className="py-12 lg:py-16">
         <Wrapper>
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400 mb-10 text-center">
             Šta nudimo
           </p>
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
             {usluge.map(({ icon: Icon, naziv, opis }) => (
               <div
                 key={naziv}
@@ -116,7 +116,7 @@ export default function UslugePage() {
       {/* CTA */}
       <div className="py-14 border-t border-zinc-100 bg-white">
         <Wrapper>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400 mb-2">
                 Trebate pomoć?
@@ -126,7 +126,7 @@ export default function UslugePage() {
             </div>
             <Link
               href="/kontakt"
-              className="px-6 py-3 bg-[#e11d1b] text-white text-sm font-semibold rounded-xl hover:bg-[#c9230f] transition-colors duration-150"
+              className="px-6 py-3 bg-[#e11d1b] text-white text-sm font-semibold rounded-xl hover:bg-[#c9230f] transition-colors duration-150 w-fit"
             >
               Kontakt
             </Link>

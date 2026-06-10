@@ -1,17 +1,32 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Search, X, ArrowRight } from "lucide-react";
-import { products, categories } from "@/lib/products";
+import { Search, X, ArrowRight, Loader2 } from "lucide-react";
+
+interface SearchProduct {
+  id: string;
+  slug: string;
+  name: string;
+  price: string;
+  image: string | null;
+  category: string;
+  categorySlug: string;
+}
+
+interface SearchCategory {
+  label: string;
+  slug: string;
+}
 
 interface SearchModalProps {
   open: boolean;
   onClose: () => void;
+  categories?: SearchCategory[];
 }
 
 const suggestions = [
-  "Baterije za kupatilo",
+  "Slavine i baterije",
   "Tuš kabine",
   "LED ogledala",
   "Sanitarije",
@@ -19,50 +34,88 @@ const suggestions = [
   "Peškir vertikale",
 ];
 
-export default function SearchModal({ open, onClose }: SearchModalProps) {
-  const [query, setQuery] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const filtered = query.trim().length > 1
-    ? products.filter((p) =>
-        p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.category.toLowerCase().includes(query.toLowerCase())
-      ).slice(0, 6)
-    : [];
+export default function SearchModal({ open, onClose, categories = [] }: SearchModalProps) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<SearchProduct[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [popular, setPopular] = useState<string[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const search = useCallback((q: string) => {
+    if (q.trim().length < 2) { setResults([]); return; }
+    setLoading(true);
+    fetch(`${BASE_URL}/search?q=${encodeURIComponent(q)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        const IMAGE_BASE = "http://localhost:3001";
+        const IMAGE_RE = /^https?:\/\/[^/]+(?=\/uploads\/)/;
+        const items: SearchProduct[] = (data.data?.products ?? []).map((p: { id: string; slug: string; name: string; price: string; images?: string[]; category?: { name: string; slug: string } }) => ({
+          id: p.id,
+          slug: p.slug,
+          name: p.name,
+          price: p.price,
+          image: p.images?.[0] ? p.images[0].replace(IMAGE_RE, IMAGE_BASE) : null,
+          category: p.category?.name ?? "",
+          categorySlug: p.category?.slug ?? "",
+        }));
+        setResults(items);
+      })
+      .catch(() => setResults([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => search(query), 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [query, search]);
 
   useEffect(() => {
     if (open) {
       setTimeout(() => inputRef.current?.focus(), 50);
       document.body.style.overflow = "hidden";
+      fetch(`${BASE_URL}/search/popular`)
+        .then((r) => r.json())
+        .then((data) => { if (Array.isArray(data.data)) setPopular(data.data); })
+        .catch(() => {});
     } else {
       document.body.style.overflow = "";
       setQuery("");
+      setResults([]);
     }
   }, [open]);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  function formatPrice(price: string) {
+    const n = Math.round(parseFloat(price));
+    return n.toLocaleString("sr-RS") + " RSD";
+  }
+
   return (
     <div
-      className={`fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm flex flex-col items-center pt-32 px-4 transition-all duration-200 ${
+      className={`fixed inset-0 z-90 bg-black/60 backdrop-blur-sm flex flex-col items-center pt-32 px-4 transition-all duration-200 ${
         open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       }`}
       onClick={onClose}
     >
-      {/* Modal */}
       <div
         className={`relative w-full max-w-2xl transition-all duration-200 ${open ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Input */}
         <div className="relative flex items-center bg-white rounded-2xl shadow-2xl overflow-hidden">
-          <Search size={20} strokeWidth={1.5} className="absolute left-5 text-zinc-400 shrink-0" />
+          {loading
+            ? <Loader2 size={20} strokeWidth={1.5} className="absolute left-5 text-zinc-400 shrink-0 animate-spin" />
+            : <Search size={20} strokeWidth={1.5} className="absolute left-5 text-zinc-400 shrink-0" />
+          }
           <input
             ref={inputRef}
             type="text"
@@ -73,7 +126,7 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
           />
           {query ? (
             <button
-              onClick={() => setQuery("")}
+              onClick={() => { setQuery(""); setResults([]); }}
               className="absolute right-4 flex items-center justify-center w-8 h-8 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 transition-colors duration-150"
             >
               <X size={16} />
@@ -86,16 +139,14 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
         {/* Results / suggestions */}
         <div className="mt-2 bg-white rounded-2xl shadow-2xl overflow-hidden">
           {query.trim().length > 1 ? (
-            filtered.length > 0 ? (
+            results.length > 0 ? (
               <>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 px-5 pt-4 pb-2">
-                  Rezultati
-                </p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 px-5 pt-4 pb-2">Rezultati</p>
                 <ul>
-                  {filtered.map((p) => (
+                  {results.map((p) => (
                     <li key={p.id}>
                       <Link
-                        href={`/proizvodi/${p.categorySlug}/${p.id}`}
+                        href={`/proizvodi/${p.categorySlug}/${p.slug}`}
                         onClick={onClose}
                         className="flex items-center justify-between px-5 py-3.5 hover:bg-zinc-50 transition-colors duration-100 group"
                       >
@@ -104,7 +155,7 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
                           <p className="text-xs text-zinc-400 mt-0.5">{p.category}</p>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="text-sm font-semibold text-zinc-950">{p.price}</span>
+                          <span className="text-sm font-semibold text-zinc-950">{formatPrice(p.price)}</span>
                           <ArrowRight size={14} className="text-zinc-300 group-hover:text-zinc-950 transition-colors duration-150" />
                         </div>
                       </Link>
@@ -120,48 +171,48 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
                   <ArrowRight size={14} />
                 </Link>
               </>
-            ) : (
+            ) : !loading ? (
               <div className="px-5 py-8 text-center">
                 <p className="text-sm text-zinc-400">Nema rezultata za „{query}"</p>
+              </div>
+            ) : (
+              <div className="px-5 py-8 text-center">
+                <p className="text-sm text-zinc-400">Pretraga...</p>
               </div>
             )
           ) : (
             <>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 px-5 pt-4 pb-2">
-                Popularne pretrage
-              </p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 px-5 pt-4 pb-2">Popularne pretrage</p>
               <ul className="pb-2">
-                {suggestions.map((s) => (
+                {(popular.length > 0 ? popular : suggestions).map((s) => (
                   <li key={s}>
                     <button
                       onClick={() => setQuery(s)}
                       className="flex items-center gap-3 w-full px-5 py-3 hover:bg-zinc-50 transition-colors duration-100 text-left group"
                     >
                       <Search size={14} strokeWidth={1.5} className="text-zinc-300 shrink-0" />
-                      <span className="text-sm text-zinc-600 group-hover:text-zinc-950 transition-colors duration-100">
-                        {s}
-                      </span>
+                      <span className="text-sm text-zinc-600 group-hover:text-zinc-950 transition-colors duration-100">{s}</span>
                     </button>
                   </li>
                 ))}
               </ul>
-              <div className="border-t border-zinc-100 px-5 py-4">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 mb-3">
-                  Kategorije
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {categories.slice(0, 6).map((cat) => (
-                    <Link
-                      key={cat.slug}
-                      href={`/proizvodi/${cat.slug}`}
-                      onClick={onClose}
-                      className="px-3 py-1.5 rounded-full border border-zinc-200 text-xs text-zinc-600 hover:border-[#e11d1b] hover:text-[#e11d1b] transition-all duration-150"
-                    >
-                      {cat.label}
-                    </Link>
-                  ))}
+              {categories.length > 0 && (
+                <div className="border-t border-zinc-100 px-5 py-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 mb-3">Kategorije</p>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.slice(0, 6).map((cat) => (
+                      <Link
+                        key={cat.slug}
+                        href={`/proizvodi/${cat.slug}`}
+                        onClick={onClose}
+                        className="px-3 py-1.5 rounded-full border border-zinc-200 text-xs text-zinc-600 hover:border-[#e11d1b] hover:text-[#e11d1b] transition-all duration-150"
+                      >
+                        {cat.label}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </>
           )}
         </div>

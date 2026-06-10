@@ -50,14 +50,14 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
       <div className="flex flex-col gap-4">
         {/* Main image */}
         <div
-          className="relative w-full aspect-[6/5] rounded-2xl overflow-hidden bg-zinc-50 cursor-zoom-in group"
+          className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden cursor-zoom-in group"
           onClick={() => openLightbox(activeIndex)}
         >
           <Image
             src={images[activeIndex]}
             alt={productName}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-contain p-6 transition-transform duration-500 group-hover:scale-105"
             priority
           />
           {/* Hint */}
@@ -70,18 +70,18 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
         </div>
 
         {/* Thumbnails */}
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-4 gap-3">
           {images.map((img, i) => (
             <div
               key={i}
               onClick={() => setActiveIndex(i)}
-              className={`relative aspect-square rounded-xl overflow-hidden bg-zinc-50 cursor-pointer border-2 transition-all duration-150 ${
+              className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-150 ${
                 i === activeIndex
                   ? "border-zinc-950"
                   : "border-transparent hover:border-zinc-300"
               }`}
             >
-              <Image src={img} alt={`${productName} ${i + 1}`} fill className="object-cover" />
+              <Image src={img} alt={`${productName} ${i + 1}`} fill className="object-contain p-1" />
             </div>
           ))}
         </div>

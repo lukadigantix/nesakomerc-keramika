@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { Poppins, Geist } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import NavbarWrapper from "@/components/layout/NavbarWrapper";
+import FooterWrapper from "@/components/layout/FooterWrapper";
+import LayoutShell from "@/components/layout/LayoutShell";
+import { CartProvider } from "@/lib/cart";
+import { AuthProvider } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
@@ -26,9 +30,16 @@ export default function RootLayout({
   return (
     <html lang="sr" className={cn("h-full", "antialiased", poppins.variable, "font-sans", geist.variable)}>
       <body className="min-h-full flex flex-col">
-        <Navbar />
-        {children}
-        <Footer />
+        <AuthProvider>
+        <CartProvider>
+          <LayoutShell
+            navbar={<Suspense><NavbarWrapper /></Suspense>}
+            footer={<Suspense><FooterWrapper /></Suspense>}
+          >
+            <Suspense>{children}</Suspense>
+          </LayoutShell>
+        </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

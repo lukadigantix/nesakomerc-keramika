@@ -5,9 +5,9 @@ export default function AboutSection() {
   return (
     <section className="py-20 border-t border-zinc-100">
       <Wrapper>
-        <div className="grid grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left — heading */}
-          <div className="col-span-4">
+          <div className="lg:col-span-4">
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400 mb-4">
               O nama
             </p>
@@ -19,7 +19,7 @@ export default function AboutSection() {
           </div>
 
           {/* Right — body */}
-          <div className="col-span-7 col-start-6 flex flex-col gap-5">
+          <div className="lg:col-span-7 lg:col-start-6 flex flex-col gap-5">
             <p className="text-base text-zinc-500 leading-relaxed">
               Nesa Komerc Keramika je porodična firma specijalizovana za prodaju i distribuciju
               opreme za kupatilo — od keramičkih obloga do kompletnih instalacionih rešenja.

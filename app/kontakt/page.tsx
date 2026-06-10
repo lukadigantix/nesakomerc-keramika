@@ -12,14 +12,14 @@ export default function KontaktPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#fafafa" }}>
       {/* Hero */}
-      <div className="pt-52 pb-10" style={{ backgroundColor: "#e11d1b" }}>
+      <div className="pt-28 pb-8" style={{ background: "linear-gradient(to right, #e11d1b, #f97316)" }}>
         <Wrapper>
           <div className="flex items-center gap-2 text-xs mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>
             <Link href="/" className="hover:text-white transition-colors duration-150">Početna</Link>
             <span>/</span>
             <span className="text-white">Kontakt</span>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">Kontakt</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Kontakt</h1>
           <p className="text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>
             Tu smo za vas — javite nam se na bilo koji način
           </p>
@@ -27,49 +27,83 @@ export default function KontaktPage() {
       </div>
 
       {/* Two boxes */}
-      <div className="pt-16">
+      <div className="pt-12 lg:pt-16">
         <Wrapper>
-          <div className="flex gap-8 items-stretch">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch">
 
             {/* Left box — info + map */}
-            <div className="w-1/2 rounded-2xl overflow-hidden shadow-sm border border-zinc-100 flex flex-col bg-white">
-              {/* Contact items — 3 columns inline */}
-              <div className="px-8 py-8 grid grid-cols-3 gap-4 border-b border-zinc-100">
-                <div className="flex flex-col items-center text-center gap-3">
+            <div className="w-full lg:w-1/2 rounded-2xl overflow-hidden shadow-sm border border-zinc-100 bg-white lg:flex lg:flex-col">
+
+              {/* Mobile: horizontal list */}
+              <div className="divide-y divide-zinc-100 lg:hidden">
+                <div className="flex items-center gap-4 px-6 py-5">
                   <div className="w-10 h-10 rounded-full bg-zinc-50 flex items-center justify-center shrink-0">
                     <Phone size={16} strokeWidth={1.8} style={{ color: "#e11d1b" }} />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-1">Telefon</p>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-0.5">Telefon</p>
                     <p className="text-sm font-medium text-zinc-800">+381 18 123 456</p>
                     <p className="text-xs text-zinc-400">+381 64 123 4567</p>
                   </div>
                 </div>
-
-                <div className="flex flex-col items-center text-center gap-3 border-x border-zinc-100 px-4">
+                <div className="flex items-center gap-4 px-6 py-5">
                   <div className="w-10 h-10 rounded-full bg-zinc-50 flex items-center justify-center shrink-0">
                     <Mail size={16} strokeWidth={1.8} style={{ color: "#e11d1b" }} />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-1">Email</p>
-                    <p className="text-sm font-medium text-zinc-800 break-all">info@nesakomerc.rs</p>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-0.5">Email</p>
+                    <p className="text-sm font-medium text-zinc-800">info@nesakomerc.rs</p>
                   </div>
                 </div>
-
-                <div className="flex flex-col items-center text-center gap-3">
+                <div className="flex items-center gap-4 px-6 py-5">
                   <div className="w-10 h-10 rounded-full bg-zinc-50 flex items-center justify-center shrink-0">
                     <MapPin size={16} strokeWidth={1.8} style={{ color: "#e11d1b" }} />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-1">Adresa</p>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-0.5">Adresa</p>
                     <p className="text-sm font-medium text-zinc-800">Vojvode Putnika 22</p>
                     <p className="text-xs text-zinc-400">Svilajnac, Srbija</p>
                   </div>
                 </div>
               </div>
 
-              {/* Map */}
-              <div className="flex-1">
+              {/* Desktop: 3-column grid */}
+              <div className="hidden lg:block px-6 py-6 border-b border-zinc-100">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="flex flex-col items-center text-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-zinc-50 flex items-center justify-center shrink-0">
+                      <Phone size={16} strokeWidth={1.8} style={{ color: "#e11d1b" }} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-1">Telefon</p>
+                      <p className="text-sm font-medium text-zinc-800">+381 18 123 456</p>
+                      <p className="text-xs text-zinc-400">+381 64 123 4567</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center text-center gap-3 border-x border-zinc-100 px-4">
+                    <div className="w-10 h-10 rounded-full bg-zinc-50 flex items-center justify-center shrink-0">
+                      <Mail size={16} strokeWidth={1.8} style={{ color: "#e11d1b" }} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-1">Email</p>
+                      <p className="text-sm font-medium text-zinc-800 break-all">info@nesakomerc.rs</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center text-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-zinc-50 flex items-center justify-center shrink-0">
+                      <MapPin size={16} strokeWidth={1.8} style={{ color: "#e11d1b" }} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-1">Adresa</p>
+                      <p className="text-sm font-medium text-zinc-800">Vojvode Putnika 22</p>
+                      <p className="text-xs text-zinc-400">Svilajnac, Srbija</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop: map */}
+              <div className="hidden lg:flex flex-1">
                 <Map center={[21.20514591349281, 44.258725534849624]} zoom={11} theme="light">
                   <MapMarker longitude={21.20514591349281} latitude={44.258725534849624}>
                     <MarkerContent>
@@ -82,12 +116,13 @@ export default function KontaktPage() {
                   </MapMarker>
                 </Map>
               </div>
+
             </div>
 
             {/* Right box — form */}
-            <div className="w-1/2 rounded-2xl shadow-sm border border-zinc-100 p-10 flex flex-col justify-center bg-white">
+            <div className="w-full lg:w-1/2 rounded-2xl shadow-sm border border-zinc-100 p-6 sm:p-10 flex flex-col justify-center bg-white">
               <form className="flex flex-col gap-5">
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium text-zinc-700">Ime</label>
                     <input
@@ -142,7 +177,7 @@ export default function KontaktPage() {
       {/* 3 contact department cards */}
       <div className="pb-16 pt-10">
         <Wrapper>
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
             {/* Prodaja */}
             <div className="rounded-2xl border border-zinc-100 bg-white p-8 flex flex-col gap-5 shadow-sm">
@@ -233,6 +268,21 @@ export default function KontaktPage() {
 
           </div>
         </Wrapper>
+      </div>
+
+      {/* Map — mobile only, full width */}
+      <div className="h-80 lg:hidden">
+        <Map center={[21.20514591349281, 44.258725534849624]} zoom={11} theme="light">
+          <MapMarker longitude={21.20514591349281} latitude={44.258725534849624}>
+            <MarkerContent>
+              <div className="flex flex-col items-center">
+                <div className="bg-white rounded-xl shadow-lg p-1.5 border border-zinc-100">
+                  <img src="/logo.png" alt="Nesa Komerc" className="h-8 w-auto" />
+                </div>
+              </div>
+            </MarkerContent>
+          </MapMarker>
+        </Map>
       </div>
     </div>
   );

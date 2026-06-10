@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 
-const brands = ["GROHE", "Hansgrohe", "ROCA", "Geberit", "Duravit", "Ravak", "Laufen"];
+interface BrandFilterProps {
+  brands: string[];
+}
 
-export default function BrandFilter() {
+export default function BrandFilter({ brands }: BrandFilterProps) {
   const [selected, setSelected] = useState<string[]>([]);
 
   const toggle = (brand: string) =>

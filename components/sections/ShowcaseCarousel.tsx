@@ -49,15 +49,17 @@ export default function ShowcaseCarousel() {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  // Kartica je 64% širine kontejnera — zaokruži na celi piksel da nema subpixel overflow
-  const cardWidth = Math.floor(containerWidth * 0.64);
+  // Na mobilnom 85% širine, na desktopu 64%
+  const cardRatio = containerWidth < 640 ? 0.85 : 0.64;
+  const cardWidth = Math.floor(containerWidth * cardRatio);
   const step = cardWidth + GAP;
   const totalTrackWidth = cards.length * cardWidth + (cards.length - 1) * GAP;
 
-  // Centriraj aktivan, klampuj uz ivice na početku/kraju
+  // Na mobilnom dodaj peek offset s lijeve strane (simetričan s desnom)
+  const peekOffset = containerWidth < 640 ? 16 : 0;
   const idealTranslate = containerWidth / 2 - cardWidth / 2 - current * step;
   const minTranslate = containerWidth - totalTrackWidth;
-  const translateX = containerWidth > 0 ? Math.min(0, Math.max(minTranslate, idealTranslate)) : 0;
+  const translateX = containerWidth > 0 ? Math.min(peekOffset, Math.max(minTranslate, idealTranslate)) : 0;
 
   const prev = () => setCurrent((i) => Math.max(0, i - 1));
   const next = () => setCurrent((i) => Math.min(cards.length - 1, i + 1));
@@ -93,7 +95,7 @@ export default function ShowcaseCarousel() {
       </Wrapper>
 
       {/* Track — full width, overflow clip */}
-      <div ref={containerRef} className="overflow-hidden mx-4 sm:mx-6 lg:mx-8">
+      <div ref={containerRef} className="overflow-hidden sm:mx-6 lg:mx-8">
         <div
           className="flex transition-transform duration-500 ease-in-out"
           style={{ transform: `translateX(${translateX}px)`, gap: GAP }}
@@ -103,7 +105,7 @@ export default function ShowcaseCarousel() {
                 key={card.title}
                 onClick={() => setCurrent(i)}
                 className="relative shrink-0 overflow-hidden rounded-2xl cursor-pointer transition-opacity duration-500"
-                style={{ width: cardWidth || "64%", height: 520, opacity: i === current ? 1 : 0.55 }}
+                style={{ width: cardWidth || "64%", height: 460, opacity: i === current ? 1 : 0.55 }}
               >
                 <Image src={card.image} alt={card.title} fill className="object-cover" priority={i === 0} />
                 <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent" />

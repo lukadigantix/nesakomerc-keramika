@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Truck, RefreshCw, ShieldCheck } from "lucide-react";
@@ -6,14 +5,33 @@ import Wrapper from "@/components/layout/Wrapper";
 import ProductGallery from "@/components/ui/ProductGallery";
 import ProductTabs from "@/components/ui/ProductTabs";
 import QuantitySelector from "@/components/ui/QuantitySelector";
-import ProductCard from "@/components/ui/ProductCard";
-import { categories, products, getCategoryBySlug, getProductById, getProductsByCategory } from "@/lib/products";
+import ProductCarousel from "@/components/ui/ProductCarousel";
+import { getProductBySlug, getProducts } from "@/lib/api";
+import { formatPrice } from "@/lib/utils";
+import { Suspense } from "react";
+import Loading from "./loading";
 
-export async function generateStaticParams() {
-  return products.map((p) => ({
-    kategorija: p.categorySlug,
-    id: String(p.id),
-  }));
+async function RecommendedProducts({ excludeId, kategorijaSlug, categoryName }: { excludeId: string; kategorijaSlug: string; categoryName: string }) {
+  const res = await getProducts({ limit: 12 });
+  const products = res.data.filter((p) => p.id !== excludeId).slice(0, 10);
+  if (products.length === 0) return null;
+  return (
+    <ProductCarousel
+      items={products.map((p) => ({
+        id: p.id,
+        name: p.name,
+        category: p.category?.name ?? categoryName,
+        price: formatPrice(p.price),
+        image: p.images[0] ?? "/images/img4.png",
+        stock: p.stock,
+        href: `/proizvodi/${p.category?.slug ?? kategorijaSlug}/${p.slug}`,
+      }))}
+      subtitle="Izdvajamo"
+      title="Preporučeni proizvodi"
+      viewAllHref="/proizvodi"
+      viewAllLabel="Svi proizvodi"
+    />
+  );
 }
 
 export async function generateMetadata({
@@ -22,12 +40,15 @@ export async function generateMetadata({
   params: Promise<{ kategorija: string; id: string }>;
 }) {
   const { id } = await params;
-  const product = getProductById(Number(id));
-  if (!product) return {};
-  return {
-    title: `${product.name} — Nesa Komerc Keramika`,
-    description: `${product.name} — ${product.price}`,
-  };
+  try {
+    const { data: product } = await getProductBySlug(id);
+    return {
+      title: `${product.name} — Nesa Komerc Keramika`,
+      description: product.shortDescription ?? product.description ?? product.name,
+    };
+  } catch {
+    return {};
+  }
 }
 
 export default async function ProizvodPage({
@@ -36,60 +57,101 @@ export default async function ProizvodPage({
   params: Promise<{ kategorija: string; id: string }>;
 }) {
   const { kategorija, id } = await params;
-  const product = getProductById(Number(id));
-  const category = getCategoryBySlug(kategorija);
+  return (
+    <Suspense fallback={<Loading />}>
+      <ProizvodPageContent kategorija={kategorija} id={id} />
+    </Suspense>
+  );
+}
 
-  if (!product || !category) notFound();
+async function ProizvodPageContent({
+  kategorija,
+  id,
+}: {
+  kategorija: string;
+  id: string;
+}) {
+  let product;
+  try {
+    const res = await getProductBySlug(id);
+    product = res.data;
+  } catch {
+    notFound();
+  }
 
-  const related = getProductsByCategory(kategorija)
-    .filter((p) => p.id !== product.id)
-    .slice(0, 5);
+  const category = product.category;
+  if (!category) notFound();
 
-  // Gallery — same image repeated for placeholder
-  const gallery = [product.image, product.image, product.image, product.image];
+  // Related products: same category, exclude current
+  const relatedRes = await getProducts({ categoryId: category.id, limit: 10 });
+  const related = relatedRes.data.filter((p) => p.id !== product.id).slice(0, 8);
+
+  const gallery = product.images.length > 0
+    ? product.images
+    : ["/images/img4.png", "/images/img4.png", "/images/img4.png", "/images/img4.png"];
+
+  const formattedPrice = formatPrice(product.price);
+  const formattedSalePrice = product.salePrice ? formatPrice(product.salePrice) : null;
+
+  // Build specs from API data + fallbacks
+  const specs: [string, string][] = [
+    ...(product.material ? [["Materijal", product.material] as [string, string]] : []),
+    ...(product.finish ? [["Završna obrada", product.finish] as [string, string]] : []),
+    ...(product.width ? [["Širina", `${product.width} mm`] as [string, string]] : []),
+    ...(product.height ? [["Visina", `${product.height} mm`] as [string, string]] : []),
+    ...(product.thickness ? [["Debljina", `${product.thickness} mm`] as [string, string]] : []),
+    ...product.specifications.map((s) => [s.key, s.value] as [string, string]),
+  ];
 
   return (
-    <div className="pt-28 pb-24 min-h-screen">
+    <div className="pt-30 sm:pt-28 min-h-screen">
       <Wrapper>
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-zinc-400 mb-8">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400 mb-6 sm:mb-8">
           <Link href="/" className="hover:text-zinc-950 transition-colors duration-150">Početna</Link>
           <span>/</span>
           <Link href="/proizvodi" className="hover:text-zinc-950 transition-colors duration-150">Svi proizvodi</Link>
           <span>/</span>
-          <Link href={`/proizvodi/${kategorija}`} className="hover:text-zinc-950 transition-colors duration-150">{category.label}</Link>
+          <Link href={`/proizvodi/${kategorija}`} className="hover:text-zinc-950 transition-colors duration-150">{category.name}</Link>
           <span>/</span>
-          <span className="text-zinc-950 truncate max-w-[200px]">{product.name}</span>
+          <span className="text-zinc-950 truncate max-w-50">{product.name}</span>
         </div>
 
         {/* Main product layout */}
-        <div className="grid grid-cols-12 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
 
           {/* Gallery — left */}
-          <div className="col-span-7">
+          <div className="lg:col-span-7">
             <ProductGallery images={gallery} productName={product.name} />
           </div>
 
           {/* Info — right */}
-          <div className="col-span-5 flex flex-col gap-6 pt-2">
+          <div className="lg:col-span-5 flex flex-col gap-6 lg:pt-2">
             {/* Category + name */}
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400 mb-3">
-                {category.label}
+                {category.name}
               </p>
-              <h1 className="text-3xl font-bold text-zinc-950 leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-zinc-950 leading-tight">
                 {product.name}
               </h1>
-              {product.description && (
+              {product.shortDescription && (
                 <p className="mt-3 text-sm text-zinc-500 leading-relaxed">
-                  {product.description}
+                  {product.shortDescription}
                 </p>
               )}
             </div>
 
             {/* Price */}
             <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-bold text-zinc-950">{product.price}</span>
+              {formattedSalePrice ? (
+                <>
+                  <span className="text-2xl sm:text-3xl font-bold" style={{ color: "#e11d1b" }}>{formattedSalePrice}</span>
+                  <span className="text-base sm:text-lg text-zinc-400 line-through">{formattedPrice}</span>
+                </>
+              ) : (
+                <span className="text-2xl sm:text-3xl font-bold text-zinc-950">{formattedPrice}</span>
+              )}
               <span className="text-sm text-zinc-400">sa PDV-om</span>
             </div>
 
@@ -100,21 +162,34 @@ export default async function ProizvodPage({
             <div className="flex flex-col divide-y divide-zinc-100">
               <div className="flex justify-between items-center py-3.5">
                 <span className="text-sm text-zinc-400">Šifra artikla</span>
-                <span className="text-sm font-semibold text-zinc-950">NK-{String(product.id).padStart(5, "0")}</span>
+                <span className="text-sm font-semibold text-zinc-950">{product.sku}</span>
               </div>
               <div className="flex justify-between items-center py-3.5">
                 <span className="text-sm text-zinc-400">Dostupnost</span>
-                <span className="flex items-center gap-2 text-sm font-semibold text-emerald-600">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                  Na stanju
-                </span>
+                {product.stock > 0 ? (
+                  <span className="flex items-center gap-2 text-sm font-semibold text-emerald-600">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                    Na stanju · {product.stock} kom
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2 text-sm font-semibold text-zinc-400">
+                    <span className="w-2 h-2 rounded-full bg-zinc-300 shrink-0" />
+                    Po narudžbini
+                  </span>
+                )}
               </div>
               <div className="flex justify-between items-center py-3.5">
                 <span className="text-sm text-zinc-400">Kategorija</span>
                 <Link href={`/proizvodi/${kategorija}`} className="text-sm font-semibold text-zinc-950 hover:underline">
-                  {category.label}
+                  {category.name}
                 </Link>
               </div>
+              {product.brand && (
+                <div className="flex justify-between items-center py-3.5">
+                  <span className="text-sm text-zinc-400">Brend</span>
+                  <span className="text-sm font-semibold text-zinc-950">{product.brand.name}</span>
+                </div>
+              )}
               <div className="flex justify-between items-center py-3.5">
                 <span className="text-sm text-zinc-400">Isporuka</span>
                 <span className="text-sm font-semibold text-zinc-950">2 — 5 radnih dana</span>
@@ -122,7 +197,18 @@ export default async function ProizvodPage({
             </div>
 
             {/* CTA buttons */}
-            <QuantitySelector />
+            <QuantitySelector
+              product={{
+                id: product.id,
+                name: product.name,
+                category: category.name,
+                price: formattedSalePrice ?? formattedPrice,
+                image: gallery[0],
+                sku: product.sku,
+              }}
+              variants={product.variants.map((v) => v.name)}
+              stock={product.stock}
+            />
 
             {/* Trust badges */}
             <div className="flex flex-col gap-3 pt-1">
@@ -137,8 +223,6 @@ export default async function ProizvodPage({
                 </div>
               ))}
             </div>
-
-            {/* Tehničke karakteristike — moved to tabs below */}
           </div>
         </div>
 
@@ -146,46 +230,35 @@ export default async function ProizvodPage({
         <ProductTabs
           description={product.description ?? ""}
           productName={product.name}
-          categoryLabel={category.label}
-          specs={[
-            ["Materijal", "Nerđajući čelik / keramika"],
-            ["Završna obrada", "Mat / Sjajni hrom"],
-            ["Garancija", "2 godine"],
-            ["Zemlja porekla", "EU"],
-            ["Težina", "Na upit"],
-            ["Dimenzije", "Na upit"],
-          ]}
+          categoryLabel={category.name}
+          specs={specs}
         />
 
-        {/* Related products */}
-        {related.length > 0 && (
-          <div className="mt-24">
-            <div className="flex items-end justify-between mb-10">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400 mb-2">
-                  {category.label}
-                </p>
-                <h2 className="text-2xl font-bold text-zinc-950">Slični proizvodi</h2>
-              </div>
-              <Link
-                href={`/proizvodi/${kategorija}`}
-                className="text-sm font-medium text-zinc-500 hover:text-zinc-950 transition-colors duration-150 pb-px border-b border-zinc-300 hover:border-zinc-950"
-              >
-                Svi iz kategorije
-              </Link>
-            </div>
-            <div className="grid grid-cols-5 gap-5">
-              {related.map((p) => (
-                <ProductCard
-                  key={p.id}
-                  product={p}
-                  href={`/proizvodi/${p.categorySlug}/${p.id}`}
-                />
-              ))}
-            </div>
-          </div>
-        )}
       </Wrapper>
+
+      {/* Related products carousel */}
+      {related.length > 0 && (
+        <ProductCarousel
+          items={related.map((p) => ({
+            id: p.id,
+            name: p.name,
+            category: p.category?.name ?? category.name,
+            price: formatPrice(p.price),
+            image: p.images[0] ?? "/images/img4.png",
+            stock: p.stock,
+            href: `/proizvodi/${p.category?.slug ?? kategorija}/${p.slug}`,
+          }))}
+          subtitle={category.name}
+          title="Slični proizvodi"
+          viewAllHref={`/proizvodi/${kategorija}`}
+          viewAllLabel="Svi iz kategorije"
+        />
+      )}
+
+      {/* Recommended products carousel */}
+      <Suspense>
+        <RecommendedProducts excludeId={product.id} kategorijaSlug={kategorija} categoryName={category.name} />
+      </Suspense>
     </div>
   );
 }

@@ -15,9 +15,9 @@ export default function ProductTabs({ description, productName, categoryLabel, s
   const [active, setActive] = useState<(typeof TABS)[number]>("Opis proizvoda");
 
   return (
-    <div className="mt-16">
+    <div className="mt-10 sm:mt-16">
       {/* Tab bar */}
-      <div className="flex gap-0 border-b border-zinc-200">
+      <div className="flex gap-0 border-b border-zinc-200 overflow-x-auto scrollbar-none">
         {TABS.map((tab) => {
           const isActive = tab === active;
           return (
@@ -40,7 +40,7 @@ export default function ProductTabs({ description, productName, categoryLabel, s
       </div>
 
       {/* Tab content */}
-      <div className="pt-8">
+      <div className="pt-8 pb-16">
         {active === "Opis proizvoda" && (
           <div className="flex flex-col gap-4 text-sm text-zinc-500 leading-relaxed">
             <p>{description}</p>

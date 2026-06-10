@@ -64,20 +64,20 @@ export default function HeroSlider() {
       <div className="absolute inset-0 bg-black/20 z-10" />
 
       {/* Sadržaj */}
-      <div className="absolute bottom-36 left-0 right-0 z-20 flex flex-col items-center gap-8 text-center text-white">
-        <h1 className="text-4xl font-semibold tracking-tighter">
+      <div className="absolute bottom-36 left-0 right-0 z-20 flex flex-col items-center gap-8 text-center text-white px-6 sm:px-0">
+        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tighter">
           Svaki detalj je pažljivo odabran
         </h1>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
           <Link
             href="/proizvodi"
-            className="px-8 py-3 rounded-full border border-white text-sm font-semibold tracking-widest uppercase text-white hover:bg-[#e11d1b] hover:border-[#e11d1b] transition-colors duration-200"
+            className="px-6 py-2.5 sm:px-8 sm:py-3 rounded-full border border-white text-xs sm:text-sm font-semibold tracking-widest text-white hover:bg-[#e11d1b] hover:border-[#e11d1b] transition-colors duration-200"
           >
             Pogledaj proizvode
           </Link>
           <Link
             href="/kontakt"
-            className="px-8 py-3 rounded-full border border-white text-sm font-semibold tracking-widest uppercase text-white hover:bg-[#e11d1b] hover:border-[#e11d1b] transition-colors duration-200"
+            className="px-6 py-2.5 sm:px-8 sm:py-3 rounded-full border border-white text-xs sm:text-sm font-semibold tracking-widest text-white hover:bg-[#e11d1b] hover:border-[#e11d1b] transition-colors duration-200"
           >
             Kontaktirajte nas
           </Link>
