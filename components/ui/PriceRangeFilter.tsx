@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 const MIN = 0;
 const MAX = 200000;
@@ -10,8 +11,15 @@ function formatPrice(v: number) {
 }
 
 export default function PriceRangeFilter() {
-  const [min, setMin] = useState(MIN);
-  const [max, setMax] = useState(MAX);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const initialMin = Math.max(MIN, Math.min(Number(searchParams.get("cena_min") ?? MIN), MAX));
+  const initialMax = Math.max(MIN, Math.min(Number(searchParams.get("cena_max") ?? MAX), MAX));
+
+  const [min, setMin] = useState(initialMin);
+  const [max, setMax] = useState(initialMax);
 
   const minPct = ((min - MIN) / (MAX - MIN)) * 100;
   const maxPct = ((max - MIN) / (MAX - MIN)) * 100;
@@ -26,9 +34,26 @@ export default function PriceRangeFilter() {
     setMax(val);
   };
 
+  const commit = (nextMin: number, nextMax: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (nextMin === MIN) {
+      params.delete("cena_min");
+    } else {
+      params.set("cena_min", String(nextMin));
+    }
+    if (nextMax === MAX) {
+      params.delete("cena_max");
+    } else {
+      params.set("cena_max", String(nextMax));
+    }
+    params.delete("stranica");
+    const qs = params.toString();
+    router.push(qs ? `${pathname}?${qs}` : pathname);
+  };
+
   return (
-    <div className="mb-6 pb-6" style={{ borderBottom: "1px solid #d3d3d3" }}>
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400 mb-5">Cena</p>
+    <div className="pb-6">
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400 mb-5 pt-6" style={{ borderTop: "1px solid #d3d3d3" }}>Cena</p>
 
       {/* Slider */}
       <div className="relative h-8 flex items-center mb-3">
@@ -52,6 +77,8 @@ export default function PriceRangeFilter() {
           step={1000}
           value={min}
           onChange={handleMin}
+          onMouseUp={() => commit(min, max)}
+          onTouchEnd={() => commit(min, max)}
           className="absolute w-full h-full appearance-none bg-transparent cursor-pointer"
           style={{ zIndex: min > MAX - 10000 ? 5 : 3 }}
         />
@@ -64,6 +91,8 @@ export default function PriceRangeFilter() {
           step={1000}
           value={max}
           onChange={handleMax}
+          onMouseUp={() => commit(min, max)}
+          onTouchEnd={() => commit(min, max)}
           className="absolute w-full h-full appearance-none bg-transparent cursor-pointer"
           style={{ zIndex: 4 }}
         />

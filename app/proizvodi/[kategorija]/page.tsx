@@ -5,16 +5,12 @@ import { getProducts, getCategories, getCategoryBySlug, getActiveBrands, getAttr
 import { formatPrice } from "@/lib/utils";
 import ProductCard from "@/components/ui/ProductCard";
 import Pagination from "@/components/ui/Pagination";
-import ProductToolbar from "@/components/ui/ProductToolbar";
+import ProductGridClient from "@/components/ui/ProductGridClient";
 import PriceRangeFilter from "@/components/ui/PriceRangeFilter";
 import AttributeFilter from "@/components/ui/AttributeFilter";
 import BrandFilter from "@/components/ui/BrandFilter";
 import MobileFilterDrawer from "@/components/ui/MobileFilterDrawer";
 import { Suspense } from "react";
-import { connection } from "next/server";
-
-const Connection = async () => { await connection(); return null; };
-const DynamicMarker = () => <Suspense><Connection /></Suspense>;
 
 export async function generateMetadata({
   params,
@@ -33,19 +29,21 @@ export async function generateMetadata({
   }
 }
 
-const PER_PAGE = 12;
+
 
 export default async function KategorijaPage({
   params,
   searchParams,
 }: {
   params: Promise<{ kategorija: string }>;
-  searchParams: Promise<{ stranica?: string; atributi?: string }>;
+  searchParams: Promise<{ stranica?: string; atributi?: string; cena_min?: string; cena_max?: string; brendovi?: string }>;
 }) {
   const { kategorija } = await params;
-  const { stranica, atributi } = await searchParams;
+  const { stranica, atributi, cena_min, cena_max, brendovi } = await searchParams;
   const currentPage = Math.max(1, parseInt(stranica ?? "1", 10));
-  const selectedValues = atributi?.split(",").filter(Boolean) ?? [];
+  const selectedBrandIds = brendovi?.split(",").filter(Boolean) ?? [];
+  const minPrice = cena_min ? Number(cena_min) : undefined;
+  const maxPrice = cena_max ? Number(cena_max) : undefined;
 
   let category;
   try {
@@ -57,24 +55,142 @@ export default async function KategorijaPage({
 
   const attributesRes = await getAttributes().catch(() => ({ success: true, data: [] }));
   const attributes = attributesRes.data;
-  const valueIdMap = new Map(attributes.flatMap((a) => a.values.map((v) => [v.value, v.id])));
-  const attributeValueIds = selectedValues.map((n) => valueIdMap.get(n)).filter((id): id is string => !!id);
 
-  const [productsRes, categoriesRes, brandsRes] = await Promise.all([
-    getProducts({ categoryId: category.id, page: currentPage, limit: PER_PAGE, attributeValueIds: attributeValueIds.length ? attributeValueIds : undefined }),
+  const [categoriesRes, brandsRes, allCatProductsRes] = await Promise.all([
     getCategories(),
     getActiveBrands(),
+    getProducts({ categoryId: category.id, limit: 999 }),
   ]);
 
-  const products = productsRes.data;
+  // --- Client-side filtering ---
+  const allCatProducts = allCatProductsRes.data;
   const categories = categoriesRes.data;
-  const brands = brandsRes.data.map((b) => b.name);
-  const total = productsRes.meta?.total ?? products.length;
-  const totalPages = productsRes.meta?.totalPages ?? Math.ceil(total / PER_PAGE);
+  const subcategories = categories.filter((cat) => cat.parentId === category.id);
+
+  // Brendovi: samo oni koji se pojavljuju u proizvodima ove kategorije
+  const categoryBrandIds = new Set(allCatProducts.map((p) => p.brandId));
+  const filteredBrands = brandsRes.data.filter((b) => categoryBrandIds.has(b.id));
+  const brandObjects = filteredBrands.map((b) => ({ id: b.id, name: b.name }));
+
+  // Parse selections from URL: format is "AttrName|value,AttrName|value"
+  // This unambiguously encodes both the attribute group and the value.
+  const selectedPairs = (atributi?.split(",").filter(Boolean) ?? [])
+    .map((s) => {
+      const idx = s.indexOf("|");
+      if (idx === -1) return null;
+      return { attrName: s.slice(0, idx), value: s.slice(idx + 1) };
+    })
+    .filter((x): x is { attrName: string; value: string } => x !== null);
+
+  // Group selections by attrName (OR within group, AND across groups)
+  const selectedByAttrName = new Map<string, string[]>();
+  for (const { attrName, value } of selectedPairs) {
+    if (!selectedByAttrName.has(attrName)) selectedByAttrName.set(attrName, []);
+    selectedByAttrName.get(attrName)!.push(value);
+  }
+
+  // Build categoryAttributes from ACTUAL product spec values (not the incomplete API values list).
+  // API attributes provide the grouping metadata (id, name, sortOrder).
+  // Spec values found in products are the actual filterable options.
+  const specByKey = new Map<string, Set<string>>();
+  for (const p of allCatProducts) {
+    for (const s of p.specifications) {
+      if (!specByKey.has(s.key)) specByKey.set(s.key, new Set());
+      specByKey.get(s.key)!.add(s.value);
+    }
+  }
+  const categoryAttributes = attributes
+    .filter((a) => (specByKey.get(a.name)?.size ?? 0) > 0)
+    .map((a) => ({
+      ...a,
+      values: [...(specByKey.get(a.name) ?? [])]
+        .sort((a, b) => a.localeCompare(b, "sr"))
+        .map((v) => ({ id: `${a.id}::${v}`, value: v, sortOrder: 0, attributeId: a.id })),
+    }));
+
+  // Match products: spec.key must equal attrName AND spec.value must equal value
+  const matchesAttrFilter = (p: typeof allCatProducts[0]) =>
+    [...selectedByAttrName.entries()].every(([attrName, vals]) =>
+      vals.some((v) => p.specifications.some((s) => s.key === attrName && s.value === v))
+    );
+
+  let filtered = allCatProducts;
+  if (selectedPairs.length) filtered = filtered.filter(matchesAttrFilter);
+  if (selectedBrandIds.length) filtered = filtered.filter((p) => selectedBrandIds.includes(p.brandId));
+  if (minPrice !== undefined) filtered = filtered.filter((p) => parseFloat(p.price) >= minPrice);
+  if (maxPrice !== undefined) filtered = filtered.filter((p) => parseFloat(p.price) <= maxPrice);
+
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / 12) || 1;
+  const products = filtered.slice((currentPage - 1) * 12, currentPage * 12);
+
+  // Faceted counts per attribute (leave-one-out: show what would match if THIS attr's filter is lifted)
+  const attrValueCounts: Record<string, Record<string, number>> = {};
+  for (const attr of categoryAttributes) {
+    // Base: products matching all filters EXCEPT this attribute's selections
+    const otherPairs = selectedPairs.filter((p) => p.attrName !== attr.name);
+    const otherByAttrName = new Map<string, string[]>();
+    for (const { attrName, value } of otherPairs) {
+      if (!otherByAttrName.has(attrName)) otherByAttrName.set(attrName, []);
+      otherByAttrName.get(attrName)!.push(value);
+    }
+    let facetBase = allCatProducts;
+    if (otherByAttrName.size) {
+      facetBase = facetBase.filter((p) =>
+        [...otherByAttrName.entries()].every(([attrName, vals]) =>
+          vals.some((v) => p.specifications.some((s) => s.key === attrName && s.value === v))
+        )
+      );
+    }
+    if (selectedBrandIds.length) facetBase = facetBase.filter((p) => selectedBrandIds.includes(p.brandId));
+    if (minPrice !== undefined) facetBase = facetBase.filter((p) => parseFloat(p.price) >= minPrice);
+    if (maxPrice !== undefined) facetBase = facetBase.filter((p) => parseFloat(p.price) <= maxPrice);
+
+    const groupCounts: Record<string, number> = {};
+    const seen = new Set<string>();
+    for (const p of facetBase) {
+      for (const spec of p.specifications) {
+        if (spec.key === attr.name) {
+          const uid = `${p.id}::${spec.value}`;
+          if (!seen.has(uid)) {
+            seen.add(uid);
+            groupCounts[spec.value] = (groupCounts[spec.value] ?? 0) + 1;
+          }
+        }
+      }
+    }
+    attrValueCounts[attr.id] = groupCounts;
+  }
+
+  // Selected values encoded as "AttrName|value" for passing to AttributeFilter
+  const selectedAttrEncoded = selectedPairs.map(({ attrName, value }) => `${attrName}|${value}`);
+  const selectedEncodedSet = new Set(selectedAttrEncoded);
+
+  // Hide attribute values with 0 results (unless currently selected)
+  const facetedAttributes = categoryAttributes
+    .map((a) => ({
+      ...a,
+      values: a.values.filter(
+        (v) => selectedEncodedSet.has(`${a.name}|${v.value}`) || (attrValueCounts[a.id]?.[v.value] ?? 0) > 0
+      ),
+    }))
+    .filter((a) => a.values.length > 0);
+
+  // Faceted brand counts (based on products filtered by attr + price, not brand)
+  const brandCounts: Record<string, number> = {};
+  {
+    let brandBase = allCatProducts;
+    if (selectedPairs.length) brandBase = brandBase.filter(matchesAttrFilter);
+    if (minPrice !== undefined) brandBase = brandBase.filter((p) => parseFloat(p.price) >= minPrice);
+    if (maxPrice !== undefined) brandBase = brandBase.filter((p) => parseFloat(p.price) <= maxPrice);
+    for (const p of brandBase) {
+      const b = filteredBrands.find((br) => br.id === p.brandId);
+      if (b) brandCounts[b.name] = (brandCounts[b.name] ?? 0) + 1;
+    }
+  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#fafafa" }}>
-      <DynamicMarker />
       {/* Hero banner */}
       <div className="pt-28 pb-8" style={{ background: "linear-gradient(to right, #e11d1b, #f97316)" }}>
         <Wrapper>
@@ -94,74 +210,70 @@ export default async function KategorijaPage({
       <Wrapper>
         <div className="flex gap-12">
           {/* Filters sidebar */}
-          <aside className="hidden min-[1330px]:flex w-56 shrink-0 flex-col gap-8">
-            <PriceRangeFilter />
-            <BrandFilter brands={brands} />
-            <AttributeFilter attributes={attributes} selectedValues={selectedValues} />
-
-            {/* Sortiranje */}
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400 mb-4">Sortiranje</p>
-              <div className="flex flex-col gap-2">
-                {["Preporučeno", "Cena: rastuće", "Cena: opadajuće", "Najnovije"].map((opt) => (
-                  <label key={opt} className="flex items-center gap-2.5 cursor-pointer group">
-                    <span className="w-4 h-4 rounded-full border border-zinc-300 group-hover:border-zinc-950 transition-colors duration-150 shrink-0" />
-                    <span className="text-sm text-zinc-500 group-hover:text-zinc-950 transition-colors duration-150">{opt}</span>
-                  </label>
-                ))}
+          <aside className="hidden min-[1330px]:flex w-56 shrink-0 flex-col gap-0 pt-[49px]">
+            {/* Podkategorije */}
+            {subcategories.length > 0 && (
+              <div className="pb-3" style={{ borderBottom: "1px solid #d3d3d3" }}>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400 mb-2">Podkategorije</p>
+                <nav className="flex flex-col">
+                  {subcategories.map((cat) => (
+                    <Link
+                      key={cat.slug}
+                      href={`/proizvodi/${cat.slug}`}
+                      className="flex items-center justify-between py-1.5 text-sm text-zinc-500 hover:text-zinc-950 transition-colors duration-150 group"
+                    >
+                      <span>{cat.name}</span>
+                      <span className="text-xs text-zinc-400 group-hover:text-zinc-500 transition-colors duration-150 tabular-nums ml-2 shrink-0"></span>
+                    </Link>
+                  ))}
+                </nav>
               </div>
-            </div>
+            )}
 
-            {/* Kategorije */}
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400 mb-4">Kategorije</p>
-              <nav className="flex flex-col">
-                {categories.map((cat) => (
-                  <Link
-                    key={cat.slug}
-                    href={`/proizvodi/${cat.slug}`}
-                    className={`py-2 text-sm transition-colors duration-150 ${cat.slug === kategorija ? "font-semibold text-zinc-950" : "text-zinc-500 hover:text-zinc-950"}`}
-                  >
-                    {cat.name}
-                  </Link>
-                ))}
-              </nav>
-            </div>
+            <Suspense><PriceRangeFilter /></Suspense>
+            <Suspense><BrandFilter brands={brandObjects} selectedBrandIds={selectedBrandIds} counts={brandCounts} /></Suspense>
+            <Suspense><AttributeFilter attributes={facetedAttributes} selectedValues={selectedAttrEncoded} countsPerAttr={attrValueCounts} /></Suspense>
           </aside>
 
           {/* Main */}
-          <div className="flex-1 min-w-0">
-            <ProductToolbar filterTrigger={
+          <ProductGridClient
+            products={products.map((p) => ({
+              id: p.id,
+              name: p.name,
+              category: p.category?.name ?? category.name,
+              price: formatPrice(p.price),
+              image: p.images[0] ?? "/images/img4.png",
+              href: `/proizvodi/${kategorija}/${p.slug}`,
+              badge: p.discountPercent ? `−${p.discountPercent}%` : p.salePrice ? "Akcija" : undefined,
+              stock: p.stock,
+              inStock: p.inStock,
+            }))}
+            total={total}
+            hasActiveFilters={selectedAttrEncoded.length > 0 || selectedBrandIds.length > 0 || !!cena_min || !!cena_max}
+            resetHref={`/proizvodi/${kategorija}`}
+            filterTrigger={
               <MobileFilterDrawer>
-                <PriceRangeFilter />
-                <BrandFilter brands={brands} />
-                <AttributeFilter attributes={attributes} selectedValues={selectedValues} />
+                <Suspense key="price"><PriceRangeFilter /></Suspense>
+                <Suspense key="brand"><BrandFilter brands={brandObjects} selectedBrandIds={selectedBrandIds} counts={brandCounts} /></Suspense>
+                <Suspense key="attr"><AttributeFilter attributes={facetedAttributes} selectedValues={selectedAttrEncoded} countsPerAttr={attrValueCounts} /></Suspense>
               </MobileFilterDrawer>
-            } />
-            {/* Grid */}
-            <div className="grid grid-cols-4 max-[1329px]:grid-cols-3 max-[639px]:grid-cols-2 max-[479px]:grid-cols-1 gap-5 max-[1329px]:gap-4">
-              {products.map((p) => (
-                <ProductCard
-                  key={p.id}
-                  product={{
-                    id: p.id,
-                    name: p.name,
-                    category: p.category?.name ?? category.name,
-                    price: formatPrice(p.price),
-                    image: p.images[0] ?? "/images/img4.png",
-                  }}
-                  href={`/proizvodi/${kategorija}/${p.slug}`}
-                  badge={p.discountPercent ? `−${p.discountPercent}%` : p.salePrice ? "Akcija" : undefined}
-                  stock={p.stock}
-                />
-              ))}
-            </div>
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              buildHref={(p) => `/proizvodi/${kategorija}?stranica=${p}${selectedValues.length ? `&atributi=${selectedValues.join(",")}` : ""}`}
-            />
-          </div>
+            }
+            pagination={
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                buildHref={(p) => {
+                  const params = new URLSearchParams();
+                  params.set("stranica", String(p));
+                  if (selectedAttrEncoded.length) params.set("atributi", selectedAttrEncoded.join(","));
+                  if (selectedBrandIds.length) params.set("brendovi", selectedBrandIds.join(","));
+                  if (cena_min) params.set("cena_min", cena_min);
+                  if (cena_max) params.set("cena_max", cena_max);
+                  return `/proizvodi/${kategorija}?${params.toString()}`;
+                }}
+              />
+            }
+          />
         </div>
       </Wrapper>
       </div>

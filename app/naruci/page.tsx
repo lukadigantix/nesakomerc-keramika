@@ -136,12 +136,18 @@ export default function NaruciPage() {
     setSubmitError("");
 
     try {
+      // For guest orders, prepend contact info to notes so it's always visible in admin
+      const guestPrefix = !token
+        ? `Kupac: ${form.ime} | Email: ${form.email} | Tel: ${form.telefon}`
+        : "";
+      const combinedNotes = [guestPrefix, form.napomena].filter(Boolean).join("\n") || undefined;
+
       const baseBody = {
         shippingAddress: form.adresa,
         shippingCity:    form.grad,
         shippingZipCode: form.ptt,
         shippingCountry: "Srbija",
-        notes:           form.napomena || undefined,
+        notes:           combinedNotes,
         couponCode:      appliedCoupon?.code || undefined,
         shippingMethodId: selectedShippingId || undefined,
         paymentMethod:   "cash_on_delivery",

@@ -12,7 +12,8 @@ export default async function NewArrivals() {
     price: formatPrice(p.price),
     image: p.images[0] ?? "/images/img4.png",
     stock: p.stock,
-    badge: p.salePrice ? "Akcija" : null,
+    inStock: p.inStock,
+    badge: p.salePrice ? "Akcija" : undefined,
     href: `/proizvodi/${p.category?.slug ?? ""}/${p.slug}`,
   }));
 

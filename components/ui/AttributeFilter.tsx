@@ -1,23 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import type { ApiAttribute } from "@/lib/api";
 
 interface Props {
   attributes: ApiAttribute[];
   selectedValues: string[];
+  countsPerAttr?: Record<string, Record<string, number>>;
 }
 
 function AttributeGroup({
   attribute,
   selectedValues,
   onToggle,
+  counts,
 }: {
   attribute: ApiAttribute;
   selectedValues: string[];
-  onToggle: (value: string) => void;
+  onToggle: (encoded: string) => void;
+  counts?: Record<string, number>;
 }) {
   const [expanded, setExpanded] = useState(true);
   const LIMIT = 6;
@@ -27,10 +30,10 @@ function AttributeGroup({
   const hasMore = attribute.values.length > LIMIT;
 
   return (
-    <div className="pb-6" style={{ borderBottom: "1px solid #d3d3d3" }}>
+    <div className={expanded ? "pb-6" : "pb-0"}>
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="flex items-center justify-between w-full pt-6"
+        className="flex items-center justify-between w-full pt-6 text-left"
         style={{ borderTop: "1px solid #d3d3d3" }}
       >
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">
@@ -47,12 +50,13 @@ function AttributeGroup({
       {expanded && (
         <div className="flex flex-col gap-2 mt-3">
           {visibleValues.map((val) => {
-            const isSelected = selectedValues.includes(val.value);
+            const encoded = `${attribute.name}|${val.value}`;
+            const isSelected = selectedValues.includes(encoded);
             return (
               <button
                 key={val.id}
-                onClick={() => onToggle(val.value)}
-                className="flex items-center gap-2.5 group text-left"
+                onClick={() => onToggle(encoded)}
+                className="flex items-center gap-2.5 group text-left w-full"
               >
                 <span
                   className="w-4 h-4 rounded shrink-0 flex items-center justify-center border transition-colors duration-150"
@@ -74,7 +78,7 @@ function AttributeGroup({
                   )}
                 </span>
                 <span
-                  className={`text-sm transition-colors duration-150 ${
+                  className={`flex-1 text-sm transition-colors duration-150 ${
                     isSelected
                       ? "text-zinc-950 font-medium"
                       : "text-zinc-500 group-hover:text-zinc-950"
@@ -82,6 +86,9 @@ function AttributeGroup({
                 >
                   {val.value}
                 </span>
+                {counts?.[val.value] != null && (
+                  <span className="text-xs text-zinc-400 tabular-nums">({counts[val.value]})</span>
+                )}
               </button>
             );
           })}
@@ -102,32 +109,40 @@ function AttributeGroup({
   );
 }
 
-export default function AttributeFilter({ attributes, selectedValues }: Props) {
+export default function AttributeFilter({ attributes, selectedValues, countsPerAttr }: Props) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const toggle = (value: string) => {
     const next = selectedValues.includes(value)
       ? selectedValues.filter((v) => v !== value)
       : [...selectedValues, value];
-    const params = new URLSearchParams();
-    if (next.length) params.set("atributi", next.join(","));
-    router.push(next.length ? `${pathname}?${params.toString()}` : pathname);
+    const params = new URLSearchParams(searchParams.toString());
+    if (next.length) {
+      params.set("atributi", next.join(","));
+    } else {
+      params.delete("atributi");
+    }
+    params.delete("stranica");
+    const qs = params.toString();
+    router.push(qs ? `${pathname}?${qs}` : pathname);
   };
 
   if (!attributes.length) return null;
 
   return (
-    <>
+    <div className="flex flex-col">
       {attributes.map((attr) => (
         <AttributeGroup
           key={attr.id}
           attribute={attr}
           selectedValues={selectedValues}
           onToggle={toggle}
+          counts={countsPerAttr?.[attr.id]}
         />
       ))}
-    </>
+    </div>
   );
 }
 

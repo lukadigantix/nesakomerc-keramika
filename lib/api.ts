@@ -58,6 +58,9 @@ export interface ApiProductBrand {
 
 export interface ApiProductVariant {
   name: string;
+  type?: string;
+  imageUrl?: string | null;
+  productId?: string | null;
 }
 
 export interface ApiProductSpec {
@@ -77,6 +80,7 @@ export interface ApiProduct {
   saleEndsAt: string | null;
   sku: string;
   stock: number;
+  inStock: boolean;
   variants: ApiProductVariant[];
   specifications: ApiProductSpec[];
   brandId: string;
@@ -118,6 +122,7 @@ export interface ApiAttribute {
 export interface ProductsQuery {
   categoryId?: string;
   attributeValueIds?: string[];
+  brandIds?: string[];
   minPrice?: number;
   maxPrice?: number;
   material?: string;
@@ -172,6 +177,9 @@ export async function getProducts(
   if (query.attributeValueIds?.length) {
     query.attributeValueIds.forEach((id) => params.append("attributeValueIds", id));
   }
+  if (query.brandIds?.length) {
+    query.brandIds.forEach((id) => params.append("brandIds", id));
+  }
   if (query.minPrice !== undefined) params.set("minPrice", String(query.minPrice));
   if (query.maxPrice !== undefined) params.set("maxPrice", String(query.maxPrice));
   if (query.material) params.set("material", query.material);
@@ -199,11 +207,50 @@ export async function getProductBySlug(slug: string): Promise<ApiResponse<ApiPro
   return apiFetch<ApiResponse<ApiProduct>>(`/products/slug/${slug}`).then(r => ({ ...r, data: fixProduct(r.data) }));
 }
 
-export async function getOnSaleProducts(): Promise<ApiListResponse<ApiProduct>> {
+export async function getProductRecommended(productId: string, limit = 8): Promise<ApiProduct[]> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("hours");
 
-  return apiFetch<ApiListResponse<ApiProduct>>("/products/on-sale").then(fixProducts);
+  const res = await apiFetch<ApiListResponse<ApiProduct>>(`/products/${productId}/recommended?limit=${limit}`);
+  return res.data.map(fixProduct);
+}
+
+export interface OnSaleQuery {
+  categoryId?: string;
+  brandId?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  attributeValueIds?: string[];
+  search?: string;
+  sortBy?: "discount" | "ending_soon" | "price_asc" | "price_desc" | "newest";
+  page?: number;
+  limit?: number;
+}
+
+export async function getOnSaleProducts(query: OnSaleQuery = {}): Promise<ApiListResponse<ApiProduct>> {
+  const params = new URLSearchParams();
+  if (query.categoryId) params.set("categoryId", query.categoryId);
+  if (query.brandId) params.set("brandId", query.brandId);
+  if (query.minPrice !== undefined) params.set("minPrice", String(query.minPrice));
+  if (query.maxPrice !== undefined) params.set("maxPrice", String(query.maxPrice));
+  if (query.attributeValueIds?.length) params.set("attributeValueIds", query.attributeValueIds.join(","));
+  if (query.search) params.set("search", query.search);
+  if (query.sortBy) params.set("sortBy", query.sortBy);
+  if (query.page) params.set("page", String(query.page));
+  if (query.limit) params.set("limit", String(query.limit));
+
+  const qs = params.toString();
+  return apiFetch<ApiListResponse<ApiProduct>>(`/products/on-sale${qs ? `?${qs}` : ""}`, { cache: "no-store" }).then(fixProducts);
+}
+
+export interface ApiOnSaleFilters {
+  brands: { id: string; name: string }[];
+  priceRange: { min: number; max: number };
+  attributes: ApiAttribute[];
+}
+
+export async function getOnSaleFilters(): Promise<ApiOnSaleFilters> {
+  return apiFetch<ApiOnSaleFilters>("/filters?onSale=true", { cache: "no-store" });
 }
 
 // ─── Categories ───────────────────────────────────────────────────────────────
@@ -247,27 +294,38 @@ export async function getActiveBrands(): Promise<ApiListResponse<ApiProductBrand
 
 export interface ApiFooterSettings {
   description: string;
-  social: {
-    facebook: string;
-    instagram: string;
-    twitter: string;
-    tiktok: string;
-  };
-  contact: {
-    street: string;
-    city: string;
-    phone: string;
-    email: string;
-    pib: string;
-    mb: string;
-  };
+  facebook: string;
+  instagram: string;
+  twitter: string;
+  tiktok: string;
+  street: string;
+  city: string;
+  phone: string;
+  email: string;
+  pib: string;
+  mb: string;
+}
+
+export interface ApiSlide {
+  id: string;
+  imageUrl: string;
+  title: string | null;
+  subtitle: string | null;
+  buttonText: string | null;
+  buttonUrl: string | null;
+  sortOrder: number;
+  isActive: boolean;
 }
 
 export async function getFooterSettings(): Promise<ApiResponse<ApiFooterSettings>> {
+  return apiFetch<ApiResponse<ApiFooterSettings>>("/footer", { cache: "no-store" });
+}
+
+export async function getSlider(): Promise<ApiListResponse<ApiSlide>> {
   "use cache";
   cacheLife("hours");
 
-  return apiFetch<ApiResponse<ApiFooterSettings>>("/footer");
+  return apiFetch<ApiListResponse<ApiSlide>>("/slider");
 }
 
 export interface WorkingHoursDisplay {

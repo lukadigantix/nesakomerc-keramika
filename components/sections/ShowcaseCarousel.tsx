@@ -55,11 +55,16 @@ export default function ShowcaseCarousel() {
   const step = cardWidth + GAP;
   const totalTrackWidth = cards.length * cardWidth + (cards.length - 1) * GAP;
 
-  // Na mobilnom dodaj peek offset s lijeve strane (simetričan s desnom)
-  const peekOffset = containerWidth < 640 ? 16 : 0;
-  const idealTranslate = containerWidth / 2 - cardWidth / 2 - current * step;
-  const minTranslate = containerWidth - totalTrackWidth;
-  const translateX = containerWidth > 0 ? Math.min(peekOffset, Math.max(minTranslate, idealTranslate)) : 0;
+  // Left offset matches Wrapper padding: px-4 sm:px-6 lg:px-8
+  const leftOffset = containerWidth < 640 ? 16 : containerWidth < 1024 ? 24 : 32;
+  const idealTranslate = leftOffset - current * step;
+  // First card: left edge at leftOffset from left edge of screen
+  const maxTranslate = leftOffset;
+  // Last card: right edge at leftOffset from right edge of screen
+  const minTranslate = containerWidth - totalTrackWidth - leftOffset;
+  const translateX = containerWidth > 0
+    ? Math.min(maxTranslate, Math.max(minTranslate, idealTranslate))
+    : 0;
 
   const prev = () => setCurrent((i) => Math.max(0, i - 1));
   const next = () => setCurrent((i) => Math.min(cards.length - 1, i + 1));
@@ -95,7 +100,7 @@ export default function ShowcaseCarousel() {
       </Wrapper>
 
       {/* Track — full width, overflow clip */}
-      <div ref={containerRef} className="overflow-hidden sm:mx-6 lg:mx-8">
+      <div ref={containerRef} className="overflow-hidden">
         <div
           className="flex transition-transform duration-500 ease-in-out"
           style={{ transform: `translateX(${translateX}px)`, gap: GAP }}

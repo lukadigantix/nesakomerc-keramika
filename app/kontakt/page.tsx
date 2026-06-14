@@ -2,6 +2,7 @@ import Link from "next/link";
 import Wrapper from "@/components/layout/Wrapper";
 import { MapPin, Phone, Mail } from "lucide-react";
 import { Map, MapMarker, MarkerContent } from "@/components/ui/map";
+import ContactForm from "@/components/ui/ContactForm";
 
 export const metadata = {
   title: "Kontakt — Nesa Komerc Keramika",
@@ -121,53 +122,8 @@ export default function KontaktPage() {
 
             {/* Right box — form */}
             <div className="w-full lg:w-1/2 rounded-2xl shadow-sm border border-zinc-100 p-6 sm:p-10 flex flex-col justify-center bg-white">
-              <form className="flex flex-col gap-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium text-zinc-700">Ime</label>
-                    <input
-                      type="text"
-                      placeholder="Marko Marković"
-                      className="w-full px-4 py-3 rounded-xl border-0 bg-[#fafafa] text-sm text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-300 transition-all duration-150 shadow-sm"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium text-zinc-700">Email</label>
-                    <input
-                      type="email"
-                      placeholder="vas@email.com"
-                      className="w-full px-4 py-3 rounded-xl border-0 bg-[#fafafa] text-sm text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-300 transition-all duration-150 shadow-sm"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-zinc-700">Kontakt Telefon</label>
-                  <input
-                    type="text"
-                    placeholder="+381 6x xxx xxxx"
-                    className="w-full px-4 py-3 rounded-xl border-0 bg-[#fafafa] text-sm text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-300 transition-all duration-150 shadow-sm"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-zinc-700">Ostavite nam poruku</label>
-                  <textarea
-                    rows={5}
-                    placeholder="Opišite vaš upit..."
-                    className="w-full px-4 py-3 rounded-xl border-0 bg-[#fafafa] text-sm text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-300 transition-all duration-150 resize-none shadow-sm"
-                  />
-                </div>
-
-                <div className="pt-1">
-                  <button
-                    type="submit"
-                    className="px-8 py-3 rounded-xl text-white text-sm font-semibold transition-colors duration-150 bg-[#e11d1b] hover:bg-[#bf1917]"
-                  >
-                    Pošaljite poruku
-                  </button>
-                </div>
-              </form>
+              <h2 className="text-xl font-bold text-zinc-950 mb-6">Pošaljite nam poruku</h2>
+              <ContactForm />
             </div>
 
           </div>

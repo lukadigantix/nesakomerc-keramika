@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";import { useState } from "react";import { Heart, ShoppingCart, PackageCheck, Check } from "lucide-react";
+import Image from "next/image";import { useState } from "react";
+import { ShoppingCart, PackageCheck, Check } from "lucide-react";
 import { useCart } from "@/lib/cart";
+import WishlistButton from "@/components/ui/WishlistButton";
 
 interface CardProduct {
   id: string;
@@ -18,13 +20,15 @@ interface Props {
   href: string;
   badge?: string | null;
   stock?: number;
+  inStock?: boolean;
   className?: string;
   onClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }
 
-export default function ProductCard({ product, href, badge, stock, className, onClick }: Props) {
+export default function ProductCard({ product, href, badge, stock, inStock, className, onClick }: Props) {
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
+  const canOrder = inStock !== undefined ? inStock : (stock === undefined || stock > 0);
   return (
     <Link
       href={href}
@@ -50,13 +54,7 @@ export default function ProductCard({ product, href, badge, stock, className, on
           </span>
         )}
         {/* Favorite button */}
-        <button
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-          aria-label="Dodaj u listu omiljenih"
-          className="absolute bottom-3 right-3 flex items-center justify-center w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm text-zinc-400 hover:text-rose-500 hover:bg-white active:text-rose-600 hover:[&_svg]:fill-rose-500 active:[&_svg]:fill-rose-600 transition-all duration-200 shadow-sm"
-        >
-          <Heart size={15} strokeWidth={1.8} />
-        </button>
+        <WishlistButton productId={product.id} />
       </div>
 
       {/* Info */}
@@ -64,20 +62,25 @@ export default function ProductCard({ product, href, badge, stock, className, on
         <span className="text-xs font-medium uppercase tracking-wider text-zinc-400">
           {product.category}
         </span>
-        <h3 className="text-base font-semibold text-zinc-950 leading-snug group-hover:text-zinc-700 transition-colors duration-150">
+        <h3 className="text-base font-semibold text-zinc-950 leading-snug group-hover:text-zinc-700 transition-colors duration-150 line-clamp-2 min-h-11">
           {product.name}
         </h3>
         <div className="mt-auto pt-4">
           <div className="flex items-center gap-1.5 mb-3">
-            <PackageCheck size={13} className="text-emerald-500" strokeWidth={2} />
-            <span className="text-xs font-medium text-emerald-600">Na lageru{stock != null ? ` · ${stock} kom` : ""}</span>
+            {canOrder ? (
+              <><PackageCheck size={13} className="text-emerald-500" strokeWidth={2} />
+              <span className="text-xs font-medium text-emerald-600">Na lageru{stock != null && stock > 0 ? ` · ${stock} kom` : ""}</span></>
+            ) : (
+              <><PackageCheck size={13} className="text-zinc-300" strokeWidth={2} />
+              <span className="text-xs font-medium text-zinc-400">Nije dostupno</span></>
+            )}
           </div>
           <p className="text-xl font-semibold text-zinc-950">{product.price}</p>
           <button
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              if (stock !== undefined && stock <= 0) return;
+              if (!canOrder) return;
               addItem({
                 id: product.id,
                 name: product.name,
@@ -89,15 +92,15 @@ export default function ProductCard({ product, href, badge, stock, className, on
               setAdded(true);
               setTimeout(() => setAdded(false), 1800);
             }}
-            disabled={stock !== undefined && stock <= 0}
+            disabled={!canOrder}
             className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-white text-sm font-medium transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ backgroundColor: added ? "#16a34a" : stock !== undefined && stock <= 0 ? "#a1a1aa" : "#e11d1b" }}
-            onMouseEnter={(e) => { if (!added && !(stock !== undefined && stock <= 0)) (e.currentTarget as HTMLElement).style.backgroundColor = "#bf1917"; }}
-            onMouseLeave={(e) => { if (!added && !(stock !== undefined && stock <= 0)) (e.currentTarget as HTMLElement).style.backgroundColor = "#e11d1b"; }}
+            style={{ backgroundColor: added ? "#16a34a" : !canOrder ? "#a1a1aa" : "#e11d1b" }}
+            onMouseEnter={(e) => { if (!added && canOrder) (e.currentTarget as HTMLElement).style.backgroundColor = "#bf1917"; }}
+            onMouseLeave={(e) => { if (!added && canOrder) (e.currentTarget as HTMLElement).style.backgroundColor = "#e11d1b"; }}
           >
             {added ? (
               <><Check size={15} strokeWidth={2.5} /> Dodato!</>
-            ) : stock !== undefined && stock <= 0 ? (
+            ) : !canOrder ? (
               <><ShoppingCart size={15} strokeWidth={2} /> Nema na lageru</>
             ) : (
               <><ShoppingCart size={15} strokeWidth={2} /> Dodaj u korpu</>

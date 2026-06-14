@@ -12,7 +12,8 @@ export default async function FeaturedProducts() {
     price: formatPrice(p.price),
     image: p.images[0] ?? "/images/img4.png",
     stock: p.stock,
-    badge: p.discountPercent ? `−${p.discountPercent}%` : null,
+    inStock: p.inStock,
+    badge: p.discountPercent ? `−${p.discountPercent}%` : undefined,
     href: `/proizvodi/${p.category?.slug ?? ""}/${p.slug}`,
   }));
 
@@ -20,7 +21,7 @@ export default async function FeaturedProducts() {
     <ProductCarousel
       items={items}
       subtitle="Izdvojeno"
-      title="Popularni proizvodi"
+      title="Preporučeni proizvodi"
       viewAllHref="/proizvodi"
       viewAllLabel="Svi proizvodi"
     />

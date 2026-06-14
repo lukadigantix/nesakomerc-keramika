@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import Wrapper from "@/components/layout/Wrapper";
+import NewsletterForm from "@/components/layout/NewsletterForm";
 import type { ApiFooterSettings, WorkingHoursDisplay } from "@/lib/api";
 
 interface FooterCategory {
@@ -26,7 +27,15 @@ const legal = [
 ];
 
 export default function Footer({ categories, settings, workingHours }: { categories: FooterCategory[]; settings: ApiFooterSettings; workingHours: WorkingHoursDisplay[] }) {
-  const { contact, social, description } = settings;
+  const s = settings ?? {} as ApiFooterSettings;
+  const contact = { street: s.street ?? "", city: s.city ?? "", phone: s.phone ?? "", email: s.email ?? "", pib: s.pib ?? "", mb: s.mb ?? "" };
+  const social = {
+    facebook: s.facebook && s.facebook !== "#" ? s.facebook : "",
+    instagram: s.instagram && s.instagram !== "#" ? s.instagram : "",
+    twitter: s.twitter && s.twitter !== "#" ? s.twitter : "",
+    tiktok: s.tiktok && s.tiktok !== "#" ? s.tiktok : "",
+  };
+  const description = s.description ?? "";
   return (
     <footer className="bg-[#3d3d3d] text-white mt-auto">
       {/* Top bar — newsletter */}
@@ -41,20 +50,7 @@ export default function Footer({ categories, settings, workingHours }: { categor
                 Budite prvi koji saznaju za akcije i novitete
               </p>
             </div>
-            <form className="flex items-center gap-3 sm:shrink-0">
-              <input
-                type="email"
-                placeholder="Vaša e-mail adresa"
-                className="h-11 px-4 rounded-full bg-white/10 border border-white/20 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/40 w-full sm:w-72 transition-colors duration-150"
-              />
-              <button
-                type="submit"
-                style={{ backgroundColor: "#e11d1b" }}
-                className="h-11 px-6 rounded-full text-white text-sm font-semibold hover:opacity-90 transition-all duration-300 shrink-0"
-              >
-                Prijavi se
-              </button>
-            </form>
+            <NewsletterForm />
           </div>
         </Wrapper>
       </div>

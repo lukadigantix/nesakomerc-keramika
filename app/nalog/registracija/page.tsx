@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff, Lock, Mail, ShieldCheck, Tag, Truck, User, Phone } from "lucide-react";
 import Wrapper from "@/components/layout/Wrapper";
 import { useAuth } from "@/lib/auth";
@@ -28,7 +28,11 @@ export default function RegistracijaPage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  if (user) { router.replace("/nalog/dashboard"); return null; }
+  useEffect(() => {
+    if (user) router.replace("/nalog/dashboard");
+  }, [user, router]);
+
+  if (user) return null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

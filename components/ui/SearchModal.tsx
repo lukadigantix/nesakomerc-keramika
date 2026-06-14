@@ -137,13 +137,13 @@ export default function SearchModal({ open, onClose, categories = [] }: SearchMo
         </div>
 
         {/* Results / suggestions */}
-        <div className="mt-2 bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="mt-2 bg-white rounded-2xl shadow-2xl overflow-hidden max-h-[min(480px,60vh)] flex flex-col">
           {query.trim().length > 1 ? (
             results.length > 0 ? (
               <>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 px-5 pt-4 pb-2">Rezultati</p>
-                <ul>
-                  {results.map((p) => (
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 px-5 pt-4 pb-2 shrink-0">Rezultati</p>
+                <ul className="overflow-y-auto">
+                  {results.slice(0, 7).map((p) => (
                     <li key={p.id}>
                       <Link
                         href={`/proizvodi/${p.categorySlug}/${p.slug}`}

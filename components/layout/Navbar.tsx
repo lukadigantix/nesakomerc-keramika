@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Search, ShoppingBag, User, Menu, X, ChevronDown } from "lucide-react";
+import { Search, ShoppingBag, User, Menu, X, ChevronDown, Heart } from "lucide-react";
 import {
   FaucetIcon,
   VanityCabinetIcon,
@@ -26,6 +26,7 @@ import { useAuth } from "@/lib/auth";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
+  // stari slugovi
   "slavine-baterije": FaucetIcon,
   "sanitarije": ToiletIcon,
   "keramika": TileIcon,
@@ -38,11 +39,39 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
   "slivnici": DrainIcon,
   "ormarici-za-lavaboe": SinkCabinetIcon,
   "ogledala-sa-ormaricem": MirrorCabinetIcon,
+  // novi slugovi iz API-ja
+  "baterije": FaucetIcon,
+  "tusevi": ShowerIcon,
+  "tus-kabine-i-paravani": ShowerIcon,
+  "kade-i-tus-kade": BathtubIcon,
+  "sanitarija": ToiletIcon,
+  "plocice": TileIcon,
+  "materijali-za-plocice": TileIcon,
+  "ogledala": OvalMirrorIcon,
+  "kupatilski-namestaj": VanityCabinetIcon,
+  "grejanje": TowelRadiatorIcon,
+  "bojleri-i-oprema": TowelRadiatorIcon,
+  "kupatilska-oprema": AccessoriesIcon,
+  "oprema-za-kupatilo": AccessoriesIcon,
+  "vodokotlici-i-ugradni-elementi": DrainIcon,
+  "vodovod-i-instalacije": DrainIcon,
+  "spa-program": BathtubIcon,
+  // API icon field values (ako API vraća string identifikatore)
+  "faucet": FaucetIcon,
+  "toilet": ToiletIcon,
+  "tile": TileIcon,
+  "shower": ShowerIcon,
+  "bathtub": BathtubIcon,
+  "mirror": OvalMirrorIcon,
+  "cabinet": VanityCabinetIcon,
+  "accessories": AccessoriesIcon,
+  "radiator": TowelRadiatorIcon,
+  "drain": DrainIcon,
 };
 
 const DEFAULT_ICON = TileIcon;
 
-interface NavCategory { label: string; slug: string; }
+interface NavCategory { label: string; slug: string; icon?: string | null; children?: { label: string; slug: string; icon?: string | null }[]; }
 
 const navLinks = [
   { label: "Mesečna akcija", href: "/akcija" },
@@ -193,6 +222,9 @@ export default function Navbar({ categories }: { categories: NavCategory[] }) {
                     <User size={22} strokeWidth={1.5} />
                   )}
                 </Link>
+                <Link href={mounted && user ? "/nalog/dashboard?tab=sacuvano" : "/nalog"} className={iconClass("hidden sm:flex")} aria-label="Sacuvani proizvodi">
+                  <Heart size={22} strokeWidth={1.5} />
+                </Link>
                 <Link href="/korpa" className={iconClass("relative")} aria-label="Korpa">
                   <ShoppingBag size={22} strokeWidth={1.5} />
                   {mounted && count > 0 && (
@@ -229,9 +261,9 @@ export default function Navbar({ categories }: { categories: NavCategory[] }) {
           <Wrapper>
             <div className="py-10">
               <p className="text-xl font-bold text-zinc-950 mb-7">Kategorije</p>
-              <div className="grid grid-cols-4 gap-x-8 gap-y-3 pb-2">
+              <div className="grid grid-cols-4 gap-x-8 gap-y-4 pb-2">
                 {categories.map((category) => {
-                    const Icon = ICON_MAP[category.slug] ?? DEFAULT_ICON;
+                    const Icon = (category.icon ? ICON_MAP[category.icon] : null) ?? ICON_MAP[category.slug] ?? DEFAULT_ICON;
                     return (
                   <Link
                     key={category.slug}
@@ -311,7 +343,7 @@ export default function Navbar({ categories }: { categories: NavCategory[] }) {
                   Svi proizvodi
                 </Link>
                 {categories.map((cat) => {
-                    const Icon = ICON_MAP[cat.slug] ?? DEFAULT_ICON;
+                    const Icon = (cat.icon ? ICON_MAP[cat.icon] : null) ?? ICON_MAP[cat.slug] ?? DEFAULT_ICON;
                     return (
                   <Link
                     key={cat.slug}

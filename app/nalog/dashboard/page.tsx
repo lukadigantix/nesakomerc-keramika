@@ -22,11 +22,15 @@ import {
   AlertCircle,
   MessageSquare,
   ChevronDown,
+  Heart,
 } from "lucide-react";
 import Wrapper from "@/components/layout/Wrapper";
 import { useAuth } from "@/lib/auth";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import GeoAutocomplete, { GeoCity, GeoAddress } from "@/components/ui/GeoAutocomplete";
+import ProductCard from "@/components/ui/ProductCard";
+import { getSavedProducts, removeFromWishlist, type SavedProduct } from "@/lib/wishlist";
+import { formatPrice } from "@/lib/utils";
 
 const mockUser = {
   name: "Marko Marković",
@@ -92,13 +96,14 @@ const statusConfig: Record<
   ceka:       { label: "Čeka",       color: "text-amber-600",   bg: "bg-amber-50",   Icon: Clock },
 };
 
-type Tab = "pregled" | "narudzбine" | "profil" | "adrese" | "reklamacije";
+type Tab = "pregled" | "narudzбine" | "profil" | "adrese" | "reklamacije" | "sacuvano";
 
 const navItems: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "pregled",      label: "Pregled",      icon: LayoutDashboard },
   { id: "narudzбine",  label: "Narudžbine",   icon: Package },
   { id: "profil",       label: "Profil",        icon: User },
   { id: "adrese",       label: "Adrese",        icon: MapPin },
+  { id: "sacuvano",     label: "Sačuvano",      icon: Heart },
   { id: "reklamacije",  label: "Reklamacije",   icon: AlertCircle },
 ];
 
@@ -494,7 +499,7 @@ function ReklamacijeSection({ orders }: { orders: ApiOrder[] }) {
                 <option value="">Izaberi porudžbinu</option>
                 {eligibleOrders.map((o) => (
                   <option key={o.id} value={o.id}>
-                    {fmtOrderId(o.id)} — {fmtDate(o.createdAt)} — {fmtPrice(o.totalPrice)}
+                    {fmtOrderId(o.id)} — {fmtDate(o.createdAt)} — {fmtPrice(o.totalAmount)}
                   </option>
                 ))}
               </select>
@@ -554,6 +559,82 @@ function ReklamacijeSection({ orders }: { orders: ApiOrder[] }) {
           Podnesi novu reklamaciju
         </button>
       )}
+    </div>
+  );
+}
+
+// ─── Sačuvano ────────────────────────────────────────────────────────────────
+
+function SacuvanoSection() {
+  const { token } = useAuth();
+  const [items, setItems] = useState<SavedProduct[]>([]);
+  const [fetching, setFetching] = useState(true);
+
+  useEffect(() => {
+    if (!token) return;
+    getSavedProducts(token).then((data) => { setItems(data); setFetching(false); });
+  }, [token]);
+
+  const handleRemove = async (productId: string) => {
+    if (!token) return;
+    await removeFromWishlist(productId, token);
+    setItems((prev) => prev.filter((i) => i.productId !== productId));
+  };
+
+  if (fetching) {
+    return (
+      <div className="grid grid-cols-3 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="rounded-2xl bg-zinc-100 animate-pulse h-72" />
+        ))}
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="w-14 h-14 rounded-full bg-zinc-100 flex items-center justify-center mb-4">
+          <Heart size={24} className="text-zinc-400" strokeWidth={1.5} />
+        </div>
+        <p className="text-sm font-semibold text-zinc-950 mb-1">Nemate sačuvanih proizvoda</p>
+        <p className="text-xs text-zinc-400 mb-6">Kliknite na srce na bilo kom proizvodu da ga sačuvate ovde.</p>
+        <Link href="/proizvodi" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#e11d1b" }}>
+          Pregledaj proizvode
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-3 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1 gap-4">
+      {items.map((item) => {
+        const p = item.product;
+        return (
+          <div key={item.id} className="relative group/wrap">
+            <ProductCard
+              product={{
+                id: p.id,
+                name: p.name,
+                category: p.category?.name ?? "",
+                price: formatPrice(p.salePrice && p.salePrice > 0 ? p.salePrice : p.price),
+                image: p.images[0] ?? "/images/img4.png",
+              }}
+              href={`/proizvodi/${p.category?.slug ?? ""}/${p.slug}`}
+              badge={p.discountPercent ? `−${p.discountPercent}%` : undefined}
+              stock={p.stock}
+              inStock={p.inStock}
+            />
+            <button
+              onClick={() => handleRemove(p.id)}
+              aria-label="Ukloni iz sačuvanih"
+              className="absolute top-3 right-3 z-20 flex items-center justify-center w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm text-zinc-400 hover:text-rose-500 hover:bg-white shadow-sm transition-all duration-200 opacity-0 group-hover/wrap:opacity-100"
+            >
+              <Trash2 size={14} strokeWidth={1.8} />
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -690,7 +771,7 @@ function AdreseSection() {
                   type={type}
                   required
                   placeholder={placeholder}
-                  value={(form as Record<string, string>)[key]}
+                  value={(form as unknown as Record<string, string>)[key]}
                   onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
                   className="h-11 px-4 rounded-xl border border-zinc-200 bg-zinc-50 text-sm text-zinc-800 outline-none focus:border-red-400 focus:bg-white focus:ring-2 focus:ring-red-100 transition-all"
                 />
@@ -789,8 +870,14 @@ function AdreseSection() {
 export default function DashboardPage() {
   const { user, logout, loading, token } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<Tab>("pregled");
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<Tab>((searchParams.get("tab") as Tab) ?? "pregled");
   const [orders, setOrders] = useState<ApiOrder[]>([]);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab") as Tab | null;
+    if (tab) setActiveTab(tab);
+  }, [searchParams]);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/nalog");
@@ -916,6 +1003,7 @@ export default function DashboardPage() {
               {activeTab === "narudzбine"    && <NarudzbineSection orders={orders} />}
               {activeTab === "profil"        && <ProfilSection user={user} fullName={fullName} />}
               {activeTab === "adrese"        && <AdreseSection />}
+              {activeTab === "sacuvano"      && <SacuvanoSection />}
               {activeTab === "reklamacije"   && <ReklamacijeSection orders={orders} />}
 
               {/* Mobile logout */}

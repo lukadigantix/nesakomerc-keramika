@@ -30,7 +30,7 @@ export default function ProductTabs({ description, productName, categoryLabel, s
               {tab}
               {isActive && (
                 <span
-                  className="absolute bottom-0 left-0 right-0 h-[2px] rounded-t"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 rounded-t"
                   style={{ backgroundColor: "#e11d1b" }}
                 />
               )}
@@ -57,14 +57,14 @@ export default function ProductTabs({ description, productName, categoryLabel, s
         )}
 
         {active === "Tehničke karakteristike" && (
-          <div className="w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-12">
             {specs.map(([key, val]) => (
               <div
                 key={key}
-                className="flex justify-between text-sm py-3 border-b border-zinc-100"
+                className="flex justify-between text-sm py-2 border-b border-zinc-100"
               >
                 <span className="text-zinc-400">{key}</span>
-                <span className="text-zinc-950 font-medium">{val}</span>
+                <span className="text-zinc-950 font-medium text-right ml-4">{val}</span>
               </div>
             ))}
           </div>

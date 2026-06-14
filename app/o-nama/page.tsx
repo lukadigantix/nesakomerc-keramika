@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import Wrapper from "@/components/layout/Wrapper";
-import { Users, Award, MapPin, Clock } from "lucide-react";
+import { Users, Award, Layers, Clock } from "lucide-react";
 
 export const metadata = {
   title: "O nama — Nesa Komerc Keramika",
@@ -12,7 +12,7 @@ const stats = [
   { icon: Clock, vrednost: "15+", oznaka: "godina iskustva" },
   { icon: Users, vrednost: "3.000+", oznaka: "zadovoljnih kupaca" },
   { icon: Award, vrednost: "5.000+", oznaka: "proizvoda u salonu" },
-  { icon: MapPin, vrednost: "1", oznaka: "salon u Svilajncu" },
+  { icon: Layers, vrednost: "30+", oznaka: "brendova u ponudi" },
 ];
 
 export default function ONamaPage() {

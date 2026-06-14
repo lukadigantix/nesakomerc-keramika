@@ -1,30 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
-interface BrandFilterProps {
-  brands: string[];
+interface Brand {
+  id: string;
+  name: string;
 }
 
-export default function BrandFilter({ brands }: BrandFilterProps) {
-  const [selected, setSelected] = useState<string[]>([]);
+interface BrandFilterProps {
+  brands: Brand[];
+  selectedBrandIds: string[];
+  counts?: Record<string, number>;
+}
 
-  const toggle = (brand: string) =>
-    setSelected((prev) =>
-      prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
-    );
+export default function BrandFilter({ brands, selectedBrandIds, counts }: BrandFilterProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const toggle = (brandId: string) => {
+    const next = selectedBrandIds.includes(brandId)
+      ? selectedBrandIds.filter((id) => id !== brandId)
+      : [...selectedBrandIds, brandId];
+    const params = new URLSearchParams(searchParams.toString());
+    if (next.length) {
+      params.set("brendovi", next.join(","));
+    } else {
+      params.delete("brendovi");
+    }
+    params.delete("stranica");
+    const qs = params.toString();
+    router.push(qs ? `${pathname}?${qs}` : pathname);
+  };
+
+  if (!brands.length) return null;
 
   return (
-    <div className="pb-6" style={{ borderBottom: "1px solid #d3d3d3" }}>
+    <div className="pb-6">
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400 mb-3 pt-6" style={{ borderTop: "1px solid #d3d3d3" }}>Brend</p>
       <div className="flex flex-col gap-2">
         {brands.map((brand) => {
-          const isSelected = selected.includes(brand);
+          const isSelected = selectedBrandIds.includes(brand.id);
           return (
             <button
-              key={brand}
-              onClick={() => toggle(brand)}
-              className="flex items-center gap-2.5 group text-left"
+              key={brand.id}
+              onClick={() => toggle(brand.id)}
+              className="flex items-center gap-2.5 group text-left w-full"
             >
               <span
                 className="w-4 h-4 rounded shrink-0 flex items-center justify-center border transition-colors duration-150"
@@ -39,9 +60,12 @@ export default function BrandFilter({ brands }: BrandFilterProps) {
                   </svg>
                 )}
               </span>
-              <span className={`text-sm transition-colors duration-150 ${isSelected ? "text-zinc-950 font-medium" : "text-zinc-500 group-hover:text-zinc-950"}`}>
-                {brand}
+              <span className={`flex-1 text-sm transition-colors duration-150 ${isSelected ? "text-zinc-950 font-medium" : "text-zinc-500 group-hover:text-zinc-950"}`}>
+                {brand.name}
               </span>
+              {counts?.[brand.name] != null && (
+                <span className="text-xs text-zinc-400 tabular-nums">({counts[brand.name]})</span>
+              )}
             </button>
           );
         })}

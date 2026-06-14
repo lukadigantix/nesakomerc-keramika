@@ -32,12 +32,14 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <AuthProvider>
         <CartProvider>
-          <LayoutShell
-            navbar={<Suspense><NavbarWrapper /></Suspense>}
-            footer={<Suspense><FooterWrapper /></Suspense>}
-          >
-            <Suspense>{children}</Suspense>
-          </LayoutShell>
+          <Suspense>
+            <LayoutShell
+              navbar={<Suspense><NavbarWrapper /></Suspense>}
+              footer={<Suspense><FooterWrapper /></Suspense>}
+            >
+              <Suspense>{children}</Suspense>
+            </LayoutShell>
+          </Suspense>
         </CartProvider>
         </AuthProvider>
       </body>

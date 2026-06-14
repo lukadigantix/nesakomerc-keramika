@@ -5,15 +5,15 @@ import Wrapper from "@/components/layout/Wrapper";
 import ProductGallery from "@/components/ui/ProductGallery";
 import ProductTabs from "@/components/ui/ProductTabs";
 import QuantitySelector from "@/components/ui/QuantitySelector";
+import WishlistButton from "@/components/ui/WishlistButton";
 import ProductCarousel from "@/components/ui/ProductCarousel";
-import { getProductBySlug, getProducts } from "@/lib/api";
+import { getProductBySlug, getProducts, getProductRecommended } from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
 import { Suspense } from "react";
 import Loading from "./loading";
 
-async function RecommendedProducts({ excludeId, kategorijaSlug, categoryName }: { excludeId: string; kategorijaSlug: string; categoryName: string }) {
-  const res = await getProducts({ limit: 12 });
-  const products = res.data.filter((p) => p.id !== excludeId).slice(0, 10);
+async function RecommendedProducts({ productId, kategorijaSlug, categoryName }: { productId: string; kategorijaSlug: string; categoryName: string }) {
+  const products = await getProductRecommended(productId, 8).catch(() => []);
   if (products.length === 0) return null;
   return (
     <ProductCarousel
@@ -160,16 +160,21 @@ async function ProizvodPageContent({
 
             {/* Specs */}
             <div className="flex flex-col divide-y divide-zinc-100">
-              <div className="flex justify-between items-center py-3.5">
+              <div className="flex justify-between items-center py-1.5 sm:py-1">
                 <span className="text-sm text-zinc-400">Šifra artikla</span>
                 <span className="text-sm font-semibold text-zinc-950">{product.sku}</span>
               </div>
-              <div className="flex justify-between items-center py-3.5">
+              <div className="flex justify-between items-center py-1.5 sm:py-1">
                 <span className="text-sm text-zinc-400">Dostupnost</span>
                 {product.stock > 0 ? (
                   <span className="flex items-center gap-2 text-sm font-semibold text-emerald-600">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                     Na stanju · {product.stock} kom
+                  </span>
+                ) : product.inStock ? (
+                  <span className="flex items-center gap-2 text-sm font-semibold text-emerald-600">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                    Na lageru
                   </span>
                 ) : (
                   <span className="flex items-center gap-2 text-sm font-semibold text-zinc-400">
@@ -178,19 +183,19 @@ async function ProizvodPageContent({
                   </span>
                 )}
               </div>
-              <div className="flex justify-between items-center py-3.5">
+              <div className="flex justify-between items-center py-1.5 sm:py-1">
                 <span className="text-sm text-zinc-400">Kategorija</span>
                 <Link href={`/proizvodi/${kategorija}`} className="text-sm font-semibold text-zinc-950 hover:underline">
                   {category.name}
                 </Link>
               </div>
               {product.brand && (
-                <div className="flex justify-between items-center py-3.5">
+                <div className="flex justify-between items-center py-1.5 sm:py-1">
                   <span className="text-sm text-zinc-400">Brend</span>
                   <span className="text-sm font-semibold text-zinc-950">{product.brand.name}</span>
                 </div>
               )}
-              <div className="flex justify-between items-center py-3.5">
+              <div className="flex justify-between items-center py-1.5 sm:py-1">
                 <span className="text-sm text-zinc-400">Isporuka</span>
                 <span className="text-sm font-semibold text-zinc-950">2 — 5 radnih dana</span>
               </div>
@@ -206,33 +211,78 @@ async function ProizvodPageContent({
                 image: gallery[0],
                 sku: product.sku,
               }}
-              variants={product.variants.map((v) => v.name)}
+              variantProducts={product.variants
+                .map((v) => {
+                  if (!v.imageUrl) return null;
+                  const match = v.productId
+                    ? related.find((p) => p.id === v.productId)
+                    : related.find((p) => p.name === v.name);
+                  return {
+                    id: v.name,
+                    name: v.name,
+                    image: v.imageUrl,
+                    href: match ? `/proizvodi/${match.category?.slug ?? kategorija}/${match.slug}` : "",
+                  };
+                })
+                .filter(Boolean) as { id: string; name: string; image: string; href: string }[]
+              }
               stock={product.stock}
+              inStock={product.inStock}
+              productId={product.id}
             />
 
-            {/* Trust badges */}
-            <div className="flex flex-col gap-3 pt-1">
-              {[
-                { icon: <Truck size={16} strokeWidth={1.8} />, text: "Besplatna dostava za narudžbine iznad 6.000 RSD" },
-                { icon: <RefreshCw size={16} strokeWidth={1.8} />, text: "Povrat u roku od 14 dana" },
-                { icon: <ShieldCheck size={16} strokeWidth={1.8} />, text: "Sigurna online kupovina" },
-              ].map(({ icon, text }) => (
-                <div key={text} className="flex items-center gap-3 text-sm text-zinc-500">
-                  <span style={{ color: "#e11d1b" }}>{icon}</span>
-                  {text}
-                </div>
-              ))}
-            </div>
+
           </div>
         </div>
 
-        {/* Tabs: Opis + Tehničke karakteristike */}
-        <ProductTabs
-          description={product.description ?? ""}
-          productName={product.name}
-          categoryLabel={category.name}
-          specs={specs}
-        />
+        {/* Tabs + Trust badges */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-12">
+          <div className="lg:col-span-7">
+            <ProductTabs
+              description={product.description ?? ""}
+              productName={product.name}
+              categoryLabel={category.name}
+              specs={specs}
+            />
+          </div>
+
+          {/* Trust badges — right of tabs on desktop, below tabs on mobile */}
+          <div className="mt-10 lg:mt-16 lg:col-span-5">
+            {/* Spacer matching tab bar height so border-t aligns with tab bar's bottom line */}
+            <div className="hidden lg:block h-12" />
+            <div className="flex flex-col" style={{ borderTop: "1px solid #e4e4e7" }}>
+            {[
+              {
+                icon: <Truck size={40} strokeWidth={1.4} />,
+                title: "Besplatna dostava",
+                text: "Za sve narudžbine iznad 6.000 RSD na teritoriji Srbije",
+              },
+              {
+                icon: <RefreshCw size={40} strokeWidth={1.4} />,
+                title: "Povrat u roku od 14 dana",
+                text: "Jednostavan postupak vraćanja robe bez komplikacija",
+              },
+              {
+                icon: <ShieldCheck size={40} strokeWidth={1.4} />,
+                title: "Sigurna online kupovina",
+                text: "SSL enkripcija i zaštita vaših podataka pri svakoj kupovini",
+              },
+            ].map(({ icon, title, text }, i, arr) => (
+              <div
+                key={title}
+                className="flex items-start gap-6 py-8"
+                style={i < arr.length - 1 ? { borderBottom: "1px solid #ebebeb" } : undefined}
+              >
+                <span className="shrink-0 mt-1" style={{ color: "#e11d1b" }}>{icon}</span>
+                <div>
+                  <p className="text-base font-semibold text-zinc-950 mb-1.5">{title}</p>
+                  <p className="text-sm text-zinc-400 leading-relaxed">{text}</p>
+                </div>
+              </div>
+            ))}
+            </div>
+          </div>
+        </div>
 
       </Wrapper>
 
@@ -257,7 +307,7 @@ async function ProizvodPageContent({
 
       {/* Recommended products carousel */}
       <Suspense>
-        <RecommendedProducts excludeId={product.id} kategorijaSlug={kategorija} categoryName={category.name} />
+        <RecommendedProducts productId={product.id} kategorijaSlug={kategorija} categoryName={category.name} />
       </Suspense>
     </div>
   );

@@ -15,7 +15,9 @@ export function formatPrice(price: string | number): string {
   return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " RSD";
 }
 
-const IMAGE_BASE = "http://localhost:3001";
+const IMAGE_BASE =
+  process.env.NEXT_PUBLIC_IMAGE_BASE_URL ?? "https://api.nesakomerckeramika.com";
+
 const IMAGE_ORIGIN_RE = /^https?:\/\/[^/]+(?=\/uploads\/)/;
 
 export function fixImageUrl(url: string): string {
