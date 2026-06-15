@@ -21,5 +21,5 @@ const IMAGE_BASE =
 const IMAGE_ORIGIN_RE = /^https?:\/\/[^/]+(?=\/uploads\/)/;
 
 export function fixImageUrl(url: string): string {
-  return url.replace(IMAGE_ORIGIN_RE, IMAGE_BASE);
+  return url.trim().replace(IMAGE_ORIGIN_RE, IMAGE_BASE);
 }
