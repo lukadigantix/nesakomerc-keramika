@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Wrapper from "@/components/layout/Wrapper";
 import { Users, Award, Layers, Clock } from "lucide-react";
+import FeaturesBar from "@/components/sections/FeaturesBar";
 
 export const metadata = {
   title: "O nama — Nesa Komerc Keramika",
@@ -92,6 +93,8 @@ export default function ONamaPage() {
           </div>
         </Wrapper>
       </div>
+
+      <FeaturesBar />
 
       {/* Values */}
       <div className="py-12 lg:py-16 bg-white border-b border-zinc-100">

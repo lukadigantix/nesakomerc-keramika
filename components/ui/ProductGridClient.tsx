@@ -11,6 +11,7 @@ interface Product {
   name: string;
   category: string;
   price: string;
+  originalPrice?: string;
   image: string;
   href: string;
   badge?: string;
@@ -67,7 +68,7 @@ export default function ProductGridClient({
         {products.map((p) => (
           <ProductCard
             key={p.id}
-            product={{ id: p.id, name: p.name, category: p.category, price: p.price, image: p.image }}
+            product={{ id: p.id, name: p.name, category: p.category, price: p.price, originalPrice: p.originalPrice, image: p.image }}
             href={p.href}
             badge={p.badge}
             stock={p.stock}

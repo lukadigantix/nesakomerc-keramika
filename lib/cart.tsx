@@ -61,7 +61,6 @@ function mapApiItems(apiItems: ApiCartItem[]): CartItem[] {
 function getLocalItems(): CartItem[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    console.log('[cart] getLocalItems raw:', stored);
     if (!stored) return [];
     const parsed = JSON.parse(stored);
     if (Array.isArray(parsed)) return parsed;
@@ -87,28 +86,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Step 1: Load cart from localStorage once on client (runs before auth resolves)
   useEffect(() => {
     const loaded = getLocalItems();
-    console.log('[cart] Step1 load from localStorage:', loaded);
     setItems(loaded);
     setCartLoaded(true);
   }, []);
 
   // Step 2: Sync with server once auth is resolved
   useEffect(() => {
-    console.log('[cart] Step2 check — cartLoaded:', cartLoaded, 'authLoading:', authLoading, 'token:', token ? 'SET' : 'null');
     if (!cartLoaded || authLoading) return;
 
     const prev = prevToken.current;
     prevToken.current = token;
-    console.log('[cart] Step2 proceeding — prev:', prev, 'token:', token ? 'SET' : 'null');
 
     if (token) {
       const pendingItems = prev === null ? getLocalItems() : [];
-      console.log('[cart] Step2 → syncAndLoad, pendingItems:', pendingItems.length);
       userModified.current = false;
       syncAndLoad(token, pendingItems);
     } else {
       if (prev !== undefined && prev !== null) {
-        console.log('[cart] Step2 → logged out, clearing');
         localStorage.removeItem(STORAGE_KEY);
         setItems([]);
       }
@@ -119,7 +113,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Step 3: Persist to localStorage — guarded by cartLoaded to never overwrite with []
   useEffect(() => {
     if (!cartLoaded) return;
-    console.log('[cart] Step3 persist — saving items:', items.length);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     } catch { /* ignore SSR */ }
@@ -172,7 +165,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     // Sync with API in background; use response to store cartItemId
     if (token) {
       const body = { productId: product.id, quantity: 1 };
-      console.log('[cart] addItem POST body:', body, 'token present:', !!token);
       fetch(`${BASE}/cart/items`, {
         method: "POST",
         headers: authHdr(token),
@@ -180,7 +172,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       })
         .then(async (r) => {
           const data = await r.json();
-          console.log('[cart] addItem POST response:', r.status, data);
           if (!r.ok) {
             // Revert the optimistic update — API rejected the item (e.g. out of stock)
             setItems((prev) => {

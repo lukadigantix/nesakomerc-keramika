@@ -18,19 +18,19 @@ const cards = [
   {
     title: "Grohe kolekcija",
     subtitle: "Premium armature za moderno kupatilo",
-    cta: { label: "Istraži", href: "/proizvodi/baterije" },
+    cta: { label: "Istraži", href: "/proizvodi?q=Grohe" },
     image: "/images/c2.png",
   },
   {
-    title: "Villeroy & Boch",
-    subtitle: "Luksuzna sanitarija za vaš dom",
-    cta: { label: "Istraži", href: "/proizvodi/sanitarije" },
+    title: "Copen kolekcija",
+    subtitle: "Moderan dizajn za savremeno kupatilo",
+    cta: { label: "Istraži", href: "/proizvodi?q=Copen" },
     image: "/images/c3.png",
   },
   {
     title: "Novo u ponudi",
     subtitle: "Najnovije kolekcije tuševa i kada",
-    cta: { label: "Pogledaj novo", href: "/proizvodi" },
+    cta: { label: "Pogledaj novo", href: "/proizvodi?sort=novo" },
     image: "/images/c4.png",
   },
 ];

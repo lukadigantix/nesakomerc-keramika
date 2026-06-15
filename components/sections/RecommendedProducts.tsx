@@ -9,11 +9,12 @@ export default async function RecommendedProducts() {
     id: p.id,
     name: p.name,
     category: p.category?.name ?? "",
-    price: formatPrice(p.price),
+    price: formatPrice(p.salePrice ?? p.price),
+    originalPrice: p.salePrice ? formatPrice(p.price) : undefined,
     image: p.images[0] ?? "/images/img4.png",
     stock: p.stock,
     inStock: p.inStock,
-    badge: p.discountPercent ? `−${p.discountPercent}%` : undefined,
+    badge: (p.saleDiscountPercent ?? 0) > 0 ? `−${p.saleDiscountPercent}%` : p.salePrice ? "Akcija" : undefined,
     href: `/proizvodi/${p.category?.slug ?? ""}/${p.slug}`,
   }));
 

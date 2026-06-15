@@ -76,7 +76,10 @@ export interface ApiProduct {
   description: string | null;
   price: string;
   salePrice: string | null;
+  saleDiscountPercent: number | null;
   discountPercent: number | null;
+  clearancePrice: string | null;
+  clearanceDiscountPercent: number | null;
   saleEndsAt: string | null;
   sku: string;
   stock: number;
@@ -130,6 +133,7 @@ export interface ProductsQuery {
   usage?: string;
   isFeatured?: boolean;
   search?: string;
+  sortBy?: "newest" | "oldest" | "price_asc" | "price_desc";
   page?: number;
   limit?: number;
 }
@@ -187,6 +191,7 @@ export async function getProducts(
   if (query.usage) params.set("usage", query.usage);
   if (query.isFeatured !== undefined) params.set("isFeatured", String(query.isFeatured));
   if (query.search) params.set("search", query.search);
+  if (query.sortBy) params.set("sortBy", query.sortBy);
   params.set("page", String(query.page ?? 1));
   params.set("limit", String(query.limit ?? 20));
 
@@ -251,6 +256,38 @@ export interface ApiOnSaleFilters {
 
 export async function getOnSaleFilters(): Promise<ApiOnSaleFilters> {
   return apiFetch<ApiOnSaleFilters>("/filters?onSale=true", { cache: "no-store" });
+}
+
+export interface ClearanceQuery {
+  categoryId?: string;
+  brandId?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  attributeValueIds?: string[];
+  search?: string;
+  sortBy?: "price_asc" | "price_desc" | "newest";
+  page?: number;
+  limit?: number;
+}
+
+export async function getClearanceProducts(query: ClearanceQuery = {}): Promise<ApiListResponse<ApiProduct>> {
+  const params = new URLSearchParams();
+  if (query.categoryId) params.set("categoryId", query.categoryId);
+  if (query.brandId) params.set("brandId", query.brandId);
+  if (query.minPrice !== undefined) params.set("minPrice", String(query.minPrice));
+  if (query.maxPrice !== undefined) params.set("maxPrice", String(query.maxPrice));
+  if (query.attributeValueIds?.length) params.set("attributeValueIds", query.attributeValueIds.join(","));
+  if (query.search) params.set("search", query.search);
+  if (query.sortBy) params.set("sortBy", query.sortBy);
+  if (query.page) params.set("page", String(query.page));
+  if (query.limit) params.set("limit", String(query.limit));
+
+  const qs = params.toString();
+  return apiFetch<ApiListResponse<ApiProduct>>(`/products/clearance${qs ? `?${qs}` : ""}`, { cache: "no-store" }).then(fixProducts);
+}
+
+export async function getClearanceFilters(): Promise<ApiOnSaleFilters> {
+  return apiFetch<ApiOnSaleFilters>("/filters?onClearance=true", { cache: "no-store" });
 }
 
 // ─── Categories ───────────────────────────────────────────────────────────────
@@ -318,7 +355,10 @@ export interface ApiSlide {
 }
 
 export async function getFooterSettings(): Promise<ApiResponse<ApiFooterSettings>> {
-  return apiFetch<ApiResponse<ApiFooterSettings>>("/footer", { cache: "no-store" });
+  "use cache";
+  cacheLife("hours");
+
+  return apiFetch<ApiResponse<ApiFooterSettings>>("/footer");
 }
 
 export async function getSlider(): Promise<ApiListResponse<ApiSlide>> {

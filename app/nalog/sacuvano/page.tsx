@@ -102,7 +102,7 @@ export default function SacuvanoPage() {
                         image: p.images[0] ?? "/images/img4.png",
                       }}
                       href={`/proizvodi/${p.category?.slug ?? ""}/${p.slug}`}
-                      badge={p.discountPercent ? `−${p.discountPercent}%` : undefined}
+                      badge={(p.saleDiscountPercent ?? 0) > 0 ? `−${p.saleDiscountPercent}%` : undefined}
                       stock={p.stock}
                       inStock={p.inStock}
                     />

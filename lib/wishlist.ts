@@ -10,6 +10,9 @@ export interface SavedProduct {
     price: number;
     salePrice?: number;
     discountPercent?: number;
+    saleDiscountPercent?: number;
+    clearancePrice?: number;
+    clearanceDiscountPercent?: number;
     stock: number;
     inStock: boolean;
     images: string[];

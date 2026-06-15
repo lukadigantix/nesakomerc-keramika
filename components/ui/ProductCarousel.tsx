@@ -16,6 +16,7 @@ export interface CarouselItemData {
   name: string;
   category: string;
   price: string;
+  originalPrice?: string;
   image: string;
   stock: number;
   inStock?: boolean;
@@ -73,7 +74,7 @@ export default function ProductCarousel({
             {items.map((item) => (
               <CarouselItem key={item.id} className="pl-4 md:pl-5 basis-4/5 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
                 <ProductCard
-                  product={{ id: item.id, name: item.name, category: item.category, price: item.price, image: item.image }}
+                  product={{ id: item.id, name: item.name, category: item.category, price: item.price, originalPrice: item.originalPrice, image: item.image }}
                   href={item.href}
                   badge={item.badge}
                   stock={item.stock}

@@ -2,9 +2,8 @@ import Link from "next/link";
 import { Tag } from "lucide-react";
 import { Suspense } from "react";
 import Wrapper from "@/components/layout/Wrapper";
-import { getOnSaleProducts, getOnSaleFilters } from "@/lib/api";
+import { getClearanceProducts, getClearanceFilters } from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
-import ProductCard from "@/components/ui/ProductCard";
 import Pagination from "@/components/ui/Pagination";
 import BrandFilter from "@/components/ui/BrandFilter";
 import PriceRangeFilter from "@/components/ui/PriceRangeFilter";
@@ -13,13 +12,13 @@ import MobileFilterDrawer from "@/components/ui/MobileFilterDrawer";
 import ProductGridClient from "@/components/ui/ProductGridClient";
 
 export const metadata = {
-  title: "Mesečna akcija — Nesa Komerc Keramika",
-  description: "Pogledajte proizvode na akciji ovog meseca.",
+  title: "Rasprodaja — Nesa Komerc Keramika",
+  description: "Pogledajte proizvode na rasprodaji — najveći popusti na odabrane artikle.",
 };
 
 const PER_PAGE = 24;
 
-export default async function AkcijaPage({
+export default async function RasprodajaPage({
   searchParams,
 }: {
   searchParams: Promise<{
@@ -38,37 +37,33 @@ export default async function AkcijaPage({
   const minPrice = cena_min ? Number(cena_min) : undefined;
   const maxPrice = cena_max ? Number(cena_max) : undefined;
 
-  // Parse attribute filters — "AttrName|value,..." same encoding as category page
   const selectedAttrEncoded = atributi?.split(",").filter(Boolean) ?? [];
   const selectedPairs = selectedAttrEncoded
-    .map((s) => { const idx = s.indexOf("|"); return idx === -1 ? null : { attrName: s.slice(0, idx), value: s.slice(idx + 1) }; })
+    .map((s) => {
+      const idx = s.indexOf("|");
+      return idx === -1 ? null : { attrName: s.slice(0, idx), value: s.slice(idx + 1) };
+    })
     .filter((x): x is { attrName: string; value: string } => x !== null);
 
-  // attributeValueIds: we pass the raw encoded values; API expects UUIDs,
-  // but our filter UI stores "AttrName|value" strings — we send the values as-is
-  // and let the server handle it, OR we just use client-side filter approach.
-  // Since the new API supports attributeValueIds as UUIDs, we'll do server-side
-  // for brand/price, and keep attribute filtering server-side only if UUIDs available.
+  const validSortBy = ["price_asc", "price_desc", "newest"].includes(sortBy ?? "")
+    ? (sortBy as "price_asc" | "price_desc" | "newest")
+    : "newest";
 
-  const validSortBy = ["discount", "ending_soon", "price_asc", "price_desc", "newest"].includes(sortBy ?? "")
-    ? (sortBy as "discount" | "ending_soon" | "price_asc" | "price_desc" | "newest")
-    : "discount";
-
-  const [saleRes, filtersRes] = await Promise.all([
-    getOnSaleProducts({
-      brandId: selectedBrandIds[0], // API accepts single brandId
+  const [clearanceRes, filtersRes] = await Promise.all([
+    getClearanceProducts({
+      brandId: selectedBrandIds[0],
       minPrice,
       maxPrice,
       sortBy: validSortBy,
       page: currentPage,
       limit: PER_PAGE,
-    }),
-    getOnSaleFilters().catch(() => ({ brands: [], priceRange: { min: 0, max: 200000 }, attributes: [] })),
+    }).catch(() => ({ success: false, data: [], meta: undefined })),
+    getClearanceFilters().catch(() => ({ brands: [], priceRange: { min: 0, max: 200000 }, attributes: [] })),
   ]);
 
-  let products = saleRes.data;
+  let products = clearanceRes.data;
 
-  // Client-side attribute filtering (same pattern as category page)
+  // Client-side attribute filtering
   if (selectedPairs.length > 0) {
     const selectedByAttrName = new Map<string, string[]>();
     for (const { attrName, value } of selectedPairs) {
@@ -82,18 +77,19 @@ export default async function AkcijaPage({
     );
   }
 
-  // Client-side multi-brand filter (API only supports single brandId)
+  // Client-side multi-brand filter
   if (selectedBrandIds.length > 1) {
     products = products.filter((p) => selectedBrandIds.includes(p.brandId));
   }
 
-  const total = saleRes.meta?.total ?? products.length;
-  const totalPages = (saleRes.meta?.totalPages ?? Math.ceil(total / PER_PAGE)) || 1;
+  const total = clearanceRes.meta?.total ?? products.length;
+  const totalPages = (clearanceRes.meta?.totalPages ?? Math.ceil(total / PER_PAGE)) || 1;
 
   const brandObjects = filtersRes.brands;
   const facetedAttributes = filtersRes.attributes.filter((a) => a.values.length > 0);
 
-  const hasActiveFilters = selectedBrandIds.length > 0 || !!cena_min || !!cena_max || selectedAttrEncoded.length > 0;
+  const hasActiveFilters =
+    selectedBrandIds.length > 0 || !!cena_min || !!cena_max || selectedAttrEncoded.length > 0;
 
   const buildFilterHref = (p: number) => {
     const params = new URLSearchParams();
@@ -103,7 +99,7 @@ export default async function AkcijaPage({
     if (cena_max) params.set("cena_max", cena_max);
     if (selectedAttrEncoded.length) params.set("atributi", selectedAttrEncoded.join(","));
     if (sortBy) params.set("sortBy", sortBy);
-    return `/akcija?${params.toString()}`;
+    return `/rasprodaja?${params.toString()}`;
   };
 
   return (
@@ -112,13 +108,15 @@ export default async function AkcijaPage({
       <div className="pt-28 pb-10" style={{ background: "linear-gradient(to right, #e11d1b, #f97316)" }}>
         <Wrapper>
           <div className="flex items-center gap-2 text-xs mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>
-            <Link href="/" className="hover:text-white transition-colors duration-150">Početna</Link>
+            <Link href="/" className="hover:text-white transition-colors duration-150">
+              Početna
+            </Link>
             <span>/</span>
-            <span className="text-white">Mesečna akcija</span>
+            <span className="text-white">Rasprodaja</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Mesečna akcija</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Rasprodaja</h1>
           <p className="text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>
-            {total > 0 ? `${total} proizvoda na akciji` : "Pratite nas za nove akcije"}
+            {total > 0 ? `${total} proizvoda na rasprodaji` : "Pratite nas za nove rasprodaje"}
           </p>
         </Wrapper>
       </div>
@@ -130,9 +128,11 @@ export default async function AkcijaPage({
               <div className="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center mb-6">
                 <Tag size={28} className="text-zinc-400" strokeWidth={1.5} />
               </div>
-              <h2 className="text-xl font-semibold text-zinc-950 mb-2">Trenutno nema aktivnih akcija</h2>
+              <h2 className="text-xl font-semibold text-zinc-950 mb-2">
+                Trenutno nema aktivnih rasprodaja
+              </h2>
               <p className="text-sm text-zinc-400 mb-8 max-w-sm">
-                Pratite nas i budite prvi koji saznaju za naše popuste i specijalne ponude.
+                Pratite nas i budite prvi koji saznaju za naše rasprodaje i specijalne ponude.
               </p>
               <Link
                 href="/proizvodi"
@@ -146,7 +146,9 @@ export default async function AkcijaPage({
             <div className="flex gap-12">
               {/* Sidebar */}
               <aside className="hidden min-[1330px]:flex w-56 shrink-0 flex-col gap-0 pt-[49px]">
-                <Suspense key="price"><PriceRangeFilter /></Suspense>
+                <Suspense key="price">
+                  <PriceRangeFilter />
+                </Suspense>
                 {brandObjects.length > 0 && (
                   <Suspense key="brand">
                     <BrandFilter brands={brandObjects} selectedBrandIds={selectedBrandIds} />
@@ -165,20 +167,29 @@ export default async function AkcijaPage({
                   id: p.id,
                   name: p.name,
                   category: p.category?.name ?? "",
-                  price: formatPrice(p.salePrice ?? p.price),
-                  originalPrice: p.salePrice ? formatPrice(p.price) : undefined,
+                  price: formatPrice(p.clearancePrice ?? p.salePrice ?? p.price),
+                  originalPrice: (p.clearancePrice || p.salePrice)
+                    ? formatPrice(p.price)
+                    : undefined,
                   image: p.images[0] ?? "/images/img4.png",
                   href: `/proizvodi/${p.category?.slug ?? ""}/${p.slug}`,
-                  badge: (p.saleDiscountPercent ?? 0) > 0 ? `−${p.saleDiscountPercent}%` : "Akcija",
+                  badge:
+                    (p.clearanceDiscountPercent ?? 0) > 0
+                      ? `−${p.clearanceDiscountPercent}%`
+                      : (p.saleDiscountPercent ?? 0) > 0
+                      ? `−${p.saleDiscountPercent}%`
+                      : "Rasprodaja",
                   stock: p.stock,
                   inStock: p.inStock,
                 }))}
                 total={total}
                 hasActiveFilters={hasActiveFilters}
-                resetHref="/akcija"
+                resetHref="/rasprodaja"
                 filterTrigger={
                   <MobileFilterDrawer>
-                    <Suspense key="price"><PriceRangeFilter /></Suspense>
+                    <Suspense key="price">
+                      <PriceRangeFilter />
+                    </Suspense>
                     {brandObjects.length > 0 && (
                       <Suspense key="brand">
                         <BrandFilter brands={brandObjects} selectedBrandIds={selectedBrandIds} />
@@ -208,4 +219,3 @@ export default async function AkcijaPage({
     </div>
   );
 }
-

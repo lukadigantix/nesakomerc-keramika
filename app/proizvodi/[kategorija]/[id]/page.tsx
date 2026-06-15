@@ -21,7 +21,9 @@ async function RecommendedProducts({ productId, kategorijaSlug, categoryName }: 
         id: p.id,
         name: p.name,
         category: p.category?.name ?? categoryName,
-        price: formatPrice(p.price),
+        price: formatPrice(p.salePrice ?? p.price),
+        originalPrice: p.salePrice ? formatPrice(p.price) : undefined,
+        badge: (p.saleDiscountPercent ?? 0) > 0 ? `−${p.saleDiscountPercent}%` : p.salePrice ? "Akcija" : undefined,
         image: p.images[0] ?? "/images/img4.png",
         stock: p.stock,
         href: `/proizvodi/${p.category?.slug ?? kategorijaSlug}/${p.slug}`,
@@ -91,7 +93,13 @@ async function ProizvodPageContent({
     : ["/images/img4.png", "/images/img4.png", "/images/img4.png", "/images/img4.png"];
 
   const formattedPrice = formatPrice(product.price);
-  const formattedSalePrice = product.salePrice ? formatPrice(product.salePrice) : null;
+  const activeSpecialPrice = product.clearancePrice ?? product.salePrice;
+  const formattedSalePrice = activeSpecialPrice ? formatPrice(activeSpecialPrice) : null;
+  const activeDiscountPercent = (product.clearanceDiscountPercent ?? 0) > 0
+    ? product.clearanceDiscountPercent
+    : (product.saleDiscountPercent ?? 0) > 0
+    ? product.saleDiscountPercent
+    : null;
 
   // Build specs from API data + fallbacks
   const specs: [string, string][] = [
@@ -143,11 +151,16 @@ async function ProizvodPageContent({
             </div>
 
             {/* Price */}
-            <div className="flex items-baseline gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               {formattedSalePrice ? (
                 <>
                   <span className="text-2xl sm:text-3xl font-bold" style={{ color: "#e11d1b" }}>{formattedSalePrice}</span>
                   <span className="text-base sm:text-lg text-zinc-400 line-through">{formattedPrice}</span>
+                  {(activeDiscountPercent ?? 0) > 0 && (
+                    <span className="px-2 py-0.5 rounded-full text-xs font-semibold text-white" style={{ backgroundColor: "#e11d1b" }}>
+                      −{activeDiscountPercent}%
+                    </span>
+                  )}
                 </>
               ) : (
                 <span className="text-2xl sm:text-3xl font-bold text-zinc-950">{formattedPrice}</span>
@@ -293,7 +306,9 @@ async function ProizvodPageContent({
             id: p.id,
             name: p.name,
             category: p.category?.name ?? category.name,
-            price: formatPrice(p.price),
+            price: formatPrice(p.clearancePrice ?? p.salePrice ?? p.price),
+            originalPrice: (p.clearancePrice || p.salePrice) ? formatPrice(p.price) : undefined,
+            badge: (p.clearanceDiscountPercent ?? 0) > 0 ? `−${p.clearanceDiscountPercent}%` : (p.saleDiscountPercent ?? 0) > 0 ? `−${p.saleDiscountPercent}%` : (p.clearancePrice || p.salePrice) ? "Akcija" : undefined,
             image: p.images[0] ?? "/images/img4.png",
             stock: p.stock,
             href: `/proizvodi/${p.category?.slug ?? kategorija}/${p.slug}`,

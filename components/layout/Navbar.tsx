@@ -75,7 +75,7 @@ interface NavCategory { label: string; slug: string; icon?: string | null; child
 
 const navLinks = [
   { label: "Mesečna akcija", href: "/akcija" },
-  { label: "Usluge", href: "/usluge" },
+  { label: "Rasprodaja", href: "/rasprodaja" },
   { label: "O nama", href: "/o-nama" },
   { label: "Kontakt", href: "/kontakt" },
 ];
@@ -105,6 +105,8 @@ export default function Navbar({ categories }: { categories: NavCategory[] }) {
   useEffect(() => {
     setMobileOpen(false);
     setMobileCatsOpen(false);
+    setDropdownOpen(false);
+    document.body.style.overflow = "";
   }, [pathname]);
 
   // Lock body scroll when mobile menu is open

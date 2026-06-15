@@ -11,6 +11,7 @@ interface CardProduct {
   name: string;
   category: string;
   price: string;
+  originalPrice?: string;
   image: string;
   sku?: string;
 }
@@ -75,7 +76,14 @@ export default function ProductCard({ product, href, badge, stock, inStock, clas
               <span className="text-xs font-medium text-zinc-400">Nije dostupno</span></>
             )}
           </div>
-          <p className="text-xl font-semibold text-zinc-950">{product.price}</p>
+          {product.originalPrice ? (
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <p className="text-xl font-semibold" style={{ color: "#e11d1b" }}>{product.price}</p>
+              <p className="text-sm text-zinc-400 line-through">{product.originalPrice}</p>
+            </div>
+          ) : (
+            <p className="text-xl font-semibold text-zinc-950">{product.price}</p>
+          )}
           <button
             onClick={(e) => {
               e.preventDefault();
