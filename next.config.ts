@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "api.nesakomerckeramika.com",
-        pathname: "/uploads/**",
+        pathname: "/**",
       },
     ],
   },
