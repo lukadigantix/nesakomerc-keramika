@@ -2,8 +2,8 @@ import Link from "next/link";
 import Wrapper from "@/components/layout/Wrapper";
 
 export const metadata = {
-  title: "Politika privatnosti — Nesa Komerc Keramika",
-  description: "Politika privatnosti Nesa Komerc Keramika — kako prikupljamo, čuvamo i koristimo vaše lične podatke.",
+  title: "Politika privatnosti — Neša Komerc Keramika",
+  description: "Politika privatnosti Neša Komerc Keramika — kako prikupljamo, čuvamo i koristimo vaše lične podatke.",
 };
 
 export default function PolitikaPrivatnostiPage() {
@@ -27,7 +27,7 @@ export default function PolitikaPrivatnostiPage() {
 
             <section>
               <h2 className="text-base font-bold text-zinc-950 mb-3">1. Uvod</h2>
-              <p>Nesa Komerc Keramika d.o.o. posvećena je zaštiti vaše privatnosti. Ova Politika privatnosti objašnjava koje lične podatke prikupljamo, kako ih koristimo, s kime ih delimo i koja su vaša prava.</p>
+              <p>Neša Komerc Keramika d.o.o. posvećena je zaštiti vaše privatnosti. Ova Politika privatnosti objašnjava koje lične podatke prikupljamo, kako ih koristimo, s kime ih delimo i koja su vaša prava.</p>
               <p className="mt-2">Korišćenjem naše veb stranice i naručivanjem naših proizvoda, prihvatate uslove ove Politike privatnosti.</p>
             </section>
 
@@ -117,7 +117,7 @@ export default function PolitikaPrivatnostiPage() {
 
             <section>
               <h2 className="text-base font-bold text-zinc-950 mb-3">11. Kontakt</h2>
-              <p className="mb-1"><strong className="text-zinc-800">Nesa Komerc Keramika d.o.o.</strong></p>
+              <p className="mb-1"><strong className="text-zinc-800">Neša Komerc Keramika d.o.o.</strong></p>
               <p>Miloše Savića BB, Svilajnac, Srbija</p>
               <p>E-mail: <a href="mailto:office@nesakomerckeramika.rs" className="text-zinc-950 underline">office@nesakomerckeramika.rs</a></p>
               <p>Telefon: <a href="tel:+381638815111" className="text-zinc-950 underline">+381 63 881 51 11</a></p>

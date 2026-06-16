@@ -138,7 +138,7 @@ export default function ZaboravljenaSifraPage() {
           </div>
 
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
-            © {new Date().getFullYear()} Nesa Komerc Keramika
+            © {new Date().getFullYear()} Neša Komerc Keramika
           </p>
         </div>
 

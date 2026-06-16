@@ -2,11 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import Wrapper from "@/components/layout/Wrapper";
 import { Users, Award, Layers, Clock } from "lucide-react";
-import FeaturesBar from "@/components/sections/FeaturesBar";
 
 export const metadata = {
-  title: "O nama — Nesa Komerc Keramika",
-  description: "Saznajte više o Nesa Komerc Keramika — porodičnoj firmi specijalizovanoj za uređenje kupatila.",
+  title: "O nama — Neša Komerc Keramika",
+  description: "Saznajte više o Neša Komerc Keramika — porodičnoj firmi specijalizovanoj za uređenje kupatila.",
 };
 
 const stats = [
@@ -29,7 +28,7 @@ export default function ONamaPage() {
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">O nama</h1>
           <p className="text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>
-            Porodična firma sa tradicijom — vaš pouzdani partner za uređenje kupatila
+            Porodična firma sa tradicijom vaš pouzdani partner za uređenje kupatila
           </p>
         </Wrapper>
       </div>
@@ -42,7 +41,7 @@ export default function ONamaPage() {
               <div className="relative w-full aspect-video overflow-hidden rounded-2xl bg-zinc-100">
                 <Image
                   src="/images/img1.png"
-                  alt="Nesa Komerc Keramika salon"
+                  alt="Neša Komerc Keramika salon"
                   fill
                   className="object-cover"
                   priority
@@ -54,22 +53,22 @@ export default function ONamaPage() {
                 Ko smo mi
               </p>
               <h2 className="text-2xl sm:text-3xl font-bold text-zinc-950 leading-tight">
-                Nesa Komerc Keramika
+                Neša Komerc Keramika
                 <br />
                 <span className="text-zinc-400 font-light text-2xl">Vaš partner za uređenje kupatila</span>
               </h2>
-              <p className="text-base text-zinc-500 leading-relaxed">
-                Nesa Komerc Keramika je porodična firma specijalizovana za prodaju i distribuciju
-                opreme za kupatilo — od keramičkih obloga do kompletnih instalacionih rešenja.
+              <p className="text-base text-justify text-zinc-500 leading-relaxed">
+                Neša Komerc Keramika je porodična firma specijalizovana za prodaju i distribuciju
+                opreme za kupatilo od keramičkih obloga do kompletnih instalacionih rešenja.
               </p>
-              <p className="text-base text-zinc-500 leading-relaxed">
+              <p className="text-base text-justify text-zinc-500 leading-relaxed">
                 U našem salonu pronaćićete pažljivo odabran asortiman od preko{" "}
-                <span className="text-zinc-950 font-semibold">5.000 proizvoda</span> — baterije,
+                <span className="text-zinc-950 font-semibold">5.000 proizvoda</span> baterije,
                 tuš kabine i kade, sanitarije, keramiku, ogledala, vertikale za peškire, slivnike
                 i kompletnu galanteriju vodećih svetskih brendova.
               </p>
-              <p className="text-base text-zinc-500 leading-relaxed">
-                Godinama izgrađujemo odnos poverenja sa kupcima koji se vraćaju — jer znamo da
+              <p className="text-base text-justify text-zinc-500 leading-relaxed">
+                Godinama izgrađujemo odnos poverenja sa kupcima koji se vraćaju jer znamo da
                 uređenje kupatila nije samo kupovina, već odluka u kojoj živite svaki dan.
               </p>
             </div>
@@ -93,8 +92,6 @@ export default function ONamaPage() {
           </div>
         </Wrapper>
       </div>
-
-      <FeaturesBar />
 
       {/* Values */}
       <div className="py-12 lg:py-16 bg-white border-b border-zinc-100">

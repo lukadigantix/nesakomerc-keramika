@@ -5,8 +5,8 @@ import { Map, MapMarker, MarkerContent } from "@/components/ui/map";
 import ContactForm from "@/components/ui/ContactForm";
 
 export const metadata = {
-  title: "Kontakt — Nesa Komerc Keramika",
-  description: "Kontaktirajte Nesa Komerc Keramika — posete salona, telefon, email i radno vreme.",
+  title: "Kontakt — Neša Komerc Keramika",
+  description: "Kontaktirajte Neša Komerc Keramika — posete salona, telefon, email i radno vreme.",
 };
 
 export default function KontaktPage() {
@@ -22,7 +22,7 @@ export default function KontaktPage() {
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Kontakt</h1>
           <p className="text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>
-            Tu smo za vas — javite nam se na bilo koji način
+            Tu smo za vas javite nam se na bilo koji način
           </p>
         </Wrapper>
       </div>
@@ -43,8 +43,8 @@ export default function KontaktPage() {
                   </div>
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-0.5">Telefon</p>
-                    <p className="text-sm font-medium text-zinc-800">+381 18 123 456</p>
-                    <p className="text-xs text-zinc-400">+381 64 123 4567</p>
+                    <p className="text-sm font-medium text-zinc-800">+381 35 8814 077</p>
+                    <p className="text-xs text-zinc-400">+381 35 8814 099</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 px-6 py-5">
@@ -53,7 +53,7 @@ export default function KontaktPage() {
                   </div>
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-0.5">Email</p>
-                    <p className="text-sm font-medium text-zinc-800">info@nesakomerc.rs</p>
+                    <p className="text-sm font-medium text-zinc-800">office@nesa-komerc.com</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 px-6 py-5">
@@ -62,7 +62,7 @@ export default function KontaktPage() {
                   </div>
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-0.5">Adresa</p>
-                    <p className="text-sm font-medium text-zinc-800">Vojvode Putnika 22</p>
+                    <p className="text-sm font-medium text-zinc-800">Stevana Sinđelića 309</p>
                     <p className="text-xs text-zinc-400">Svilajnac, Srbija</p>
                   </div>
                 </div>
@@ -77,8 +77,8 @@ export default function KontaktPage() {
                     </div>
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-1">Telefon</p>
-                      <p className="text-sm font-medium text-zinc-800">+381 18 123 456</p>
-                      <p className="text-xs text-zinc-400">+381 64 123 4567</p>
+                      <p className="text-sm font-medium text-zinc-800">+381 35 8814 077</p>
+                      <p className="text-xs text-zinc-400">+381 35 8814 099</p>
                     </div>
                   </div>
                   <div className="flex flex-col items-center text-center gap-3 border-x border-zinc-100 px-4">
@@ -87,7 +87,7 @@ export default function KontaktPage() {
                     </div>
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-1">Email</p>
-                      <p className="text-sm font-medium text-zinc-800 break-all">info@nesakomerc.rs</p>
+                      <p className="text-sm font-medium text-zinc-800 break-all">office@nesa-komerc.com</p>
                     </div>
                   </div>
                   <div className="flex flex-col items-center text-center gap-3">
@@ -96,7 +96,7 @@ export default function KontaktPage() {
                     </div>
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-1">Adresa</p>
-                      <p className="text-sm font-medium text-zinc-800">Vojvode Putnika 22</p>
+                      <p className="text-sm font-medium text-zinc-800">Stevana Sinđelića 309</p>
                       <p className="text-xs text-zinc-400">Svilajnac, Srbija</p>
                     </div>
                   </div>
@@ -148,14 +148,14 @@ export default function KontaktPage() {
               </div>
               <div className="flex items-center gap-3 mt-auto">
                 <a
-                  href="mailto:prodaja@nesakomerc.rs"
+                  href="mailto:office@nesa-komerc.com"
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors duration-150"
                 >
                   <Mail size={14} strokeWidth={1.8} />
                   Email
                 </a>
                 <a
-                  href="tel:+381181234567"
+                  href="tel:+381358814077"
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors duration-150"
                 >
                   <Phone size={14} strokeWidth={1.8} />
@@ -175,25 +175,18 @@ export default function KontaktPage() {
                   Imate problem sa narudžbinom? Kontaktirajte nas i rešićemo ga u najkraćem roku.
                 </p>
               </div>
-              <div className="flex items-center gap-3 mt-auto">
-                <a
-                  href="mailto:reklamacije@nesakomerc.rs"
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors duration-150"
+              <div className="mt-auto">
+                <Link
+                  href="/reklamacije"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors duration-150"
                 >
                   <Mail size={14} strokeWidth={1.8} />
-                  Email
-                </a>
-                <a
-                  href="tel:+381181234567"
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors duration-150"
-                >
-                  <Phone size={14} strokeWidth={1.8} />
-                  Pozovite
-                </a>
+                  Podnesi reklamaciju
+                </Link>
               </div>
             </div>
 
-            {/* Tehnicka podrska */}
+            {/* Poseta salonu */}
             <div className="rounded-2xl border border-zinc-100 bg-white p-8 flex flex-col gap-5 shadow-sm">
               <div className="w-14 h-14 rounded-xl bg-zinc-50 flex items-center justify-center">
                 <MapPin size={28} strokeWidth={1.6} className="text-zinc-400" />
@@ -204,20 +197,15 @@ export default function KontaktPage() {
                   Posetite nas u salonu i pogledajte kompletan izložbeni prostor uživo.
                 </p>
               </div>
-              <div className="flex items-center gap-3 mt-auto">
+              <div className="mt-auto">
                 <a
-                  href="mailto:info@nesakomerc.rs"
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors duration-150"
+                  href="https://maps.app.goo.gl/xdVjfMj4qEQSSJoL6"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors duration-150"
                 >
-                  <Mail size={14} strokeWidth={1.8} />
-                  Email
-                </a>
-                <a
-                  href="tel:+381181234567"
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors duration-150"
-                >
-                  <Phone size={14} strokeWidth={1.8} />
-                  Pozovite
+                  <MapPin size={14} strokeWidth={1.8} />
+                  Putanja do salona
                 </a>
               </div>
             </div>

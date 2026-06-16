@@ -99,7 +99,7 @@ export default function RegistracijaPage() {
               Kreirajte<br />nalog
             </h1>
             <p className="text-base mb-10" style={{ color: "rgba(255,255,255,0.75)" }}>
-              Registrujte se i uživajte u svim pogodnostima<br />Nesa Komerc Keramika naloga.
+              Registrujte se i uživajte u svim pogodnostima<br />Neša Komerc Keramika naloga.
             </p>
             <div className="flex flex-col gap-4">
               {perks.map(({ icon: Icon, text }) => (
@@ -117,7 +117,7 @@ export default function RegistracijaPage() {
           </div>
 
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
-            © {new Date().getFullYear()} Nesa Komerc Keramika
+            © {new Date().getFullYear()} Neša Komerc Keramika
           </p>
         </div>
 

@@ -19,7 +19,7 @@ export default function MobileFilterDrawer({ children }: Props) {
     <div className="contents">
       <button
         onClick={() => setOpen(true)}
-        className="min-[1330px]:hidden flex items-center gap-2 h-8 px-3 rounded-lg border border-zinc-200 text-sm text-zinc-700 bg-white hover:border-zinc-400 transition-colors duration-150"
+        className="min-[1330px]:hidden flex items-center justify-center gap-2 w-full sm:w-auto h-10 sm:h-8 px-3 rounded-lg border border-zinc-200 text-sm text-zinc-700 bg-white hover:border-zinc-400 transition-colors duration-150"
       >
         <SlidersHorizontal size={14} strokeWidth={1.8} />
         Filteri

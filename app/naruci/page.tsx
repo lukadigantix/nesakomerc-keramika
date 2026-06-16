@@ -17,26 +17,26 @@ function formatPrice(amount: number): string {
   return amount.toLocaleString("sr-RS") + " RSD";
 }
 
-const COUPONS: Record<string, { label: string; type: "percent" | "fixed"; value: number }> = {
-  NESA10:     { label: "10% popusta",      type: "percent", value: 10 },
-  DOBRODOSLI: { label: "1.000 RSD popusta", type: "fixed",   value: 1000 },
-  KERAMIKA15: { label: "15% popusta",      type: "percent", value: 15 },
-};
 
 export default function NaruciPage() {
   const { user, token } = useAuth();
   const { items, clearCart } = useCart();
 
   const [form, setForm] = useState({
-    ime: "", email: "", telefon: "",
+    ime: "", prezime: "", email: "", telefon: "",
     adresa: "", grad: "", ptt: "", napomena: "",
+    nazivFirme: "", pib: "", maticniBroj: "",
   });
+  const [pravnoLice, setPravnoLice] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [errors, setErrors] = useState<Partial<typeof form>>({});
   const [shippingMethods, setShippingMethods] = useState<ApiShippingMethod[]>([]);
   const [selectedShippingId, setSelectedShippingId] = useState<string | null>(null);
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     getShippingMethods()
@@ -53,7 +53,8 @@ export default function NaruciPage() {
     if (!user) return;
     setForm((f) => ({
       ...f,
-      ime: `${user.firstName} ${user.lastName}`.trim(),
+      ime: user.firstName,
+      prezime: user.lastName,
       email: user.email,
       telefon: user.phone ?? "",
     }));
@@ -83,6 +84,23 @@ export default function NaruciPage() {
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<null | { code: string; label: string; type: "percent" | "fixed"; value: number }>(null);
   const [couponError, setCouponError] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("appliedCoupon");
+      if (saved) setAppliedCoupon(JSON.parse(saved));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    if (appliedCoupon) {
+      localStorage.setItem("appliedCoupon", JSON.stringify(appliedCoupon));
+    } else {
+      localStorage.removeItem("appliedCoupon");
+    }
+  }, [appliedCoupon, mounted]);
 
   const subtotal = items.reduce((sum, item) => sum + parsePrice(item.price) * item.quantity, 0);
   const discount = appliedCoupon
@@ -100,13 +118,35 @@ export default function NaruciPage() {
   const effectiveShipping = hasFreeCourier ? 0 : shippingPrice;
   const total = subtotal - discount + effectiveShipping;
 
-  function applyCoupon() {
+  async function applyCoupon() {
     const code = couponInput.trim().toUpperCase();
-    const match = COUPONS[code];
-    if (!match) { setCouponError("Kupon nije pronađen ili je istekao."); return; }
-    setAppliedCoupon({ code, ...match });
+    if (!code) return;
     setCouponError("");
-    setCouponInput("");
+    setCouponLoading(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coupons/validate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, orderAmount: subtotal }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const c = data.data;
+        const type: "percent" | "fixed" = c.discountType === "percentage" ? "percent" : "fixed";
+        const value = parseFloat(c.discountValue);
+        const label = type === "percent"
+          ? `${value}% popusta`
+          : `${value.toLocaleString("sr-RS")} RSD popusta`;
+        setAppliedCoupon({ code, label, type, value });
+        setCouponInput("");
+      } else {
+        setCouponError(data.message ?? "Kupon nije pronađen ili je istekao.");
+      }
+    } catch {
+      setCouponError("Greška pri proveri kupona. Pokušajte ponovo.");
+    } finally {
+      setCouponLoading(false);
+    }
   }
 
   function set(field: keyof typeof form) {
@@ -119,11 +159,17 @@ export default function NaruciPage() {
   function validate() {
     const e: Partial<typeof form> = {};
     if (!form.ime.trim())     e.ime     = "Obavezno polje";
+    if (!form.prezime.trim()) e.prezime = "Obavezno polje";
     if (!form.email.trim())   e.email   = "Obavezno polje";
     if (!form.telefon.trim()) e.telefon = "Obavezno polje";
     if (!form.adresa.trim())  e.adresa  = "Obavezno polje";
     if (!form.grad.trim())    e.grad    = "Obavezno polje";
     if (!form.ptt.trim())     e.ptt     = "Obavezno polje";
+    if (pravnoLice) {
+      if (!form.nazivFirme.trim()) e.nazivFirme = "Obavezno polje";
+      if (!form.pib.trim())        e.pib        = "Obavezno polje";
+      if (!form.maticniBroj.trim()) e.maticniBroj = "Obavezno polje";
+    }
     return e;
   }
 
@@ -137,8 +183,9 @@ export default function NaruciPage() {
 
     try {
       // For guest orders, prepend contact info to notes so it's always visible in admin
+      const fullName = [form.ime, form.prezime].filter(Boolean).join(" ");
       const guestPrefix = !token
-        ? `Kupac: ${form.ime} | Email: ${form.email} | Tel: ${form.telefon}`
+        ? `Kupac: ${fullName} | Email: ${form.email} | Tel: ${form.telefon}`
         : "";
       const combinedNotes = [guestPrefix, form.napomena].filter(Boolean).join("\n") || undefined;
 
@@ -151,6 +198,11 @@ export default function NaruciPage() {
         couponCode:      appliedCoupon?.code || undefined,
         shippingMethodId: selectedShippingId || undefined,
         paymentMethod:   "cash_on_delivery",
+        ...(pravnoLice && {
+          companyName: form.nazivFirme,
+          pib:         form.pib,
+          mb:          form.maticniBroj,
+        }),
         items: items.map((i) => ({ productId: i.id, quantity: i.quantity })),
       };
 
@@ -159,7 +211,7 @@ export default function NaruciPage() {
 
       const body = token ? baseBody : {
         ...baseBody,
-        guestName:  form.ime,
+        guestName:  fullName,
         guestEmail: form.email,
         guestPhone: form.telefon,
       };
@@ -174,6 +226,7 @@ export default function NaruciPage() {
       if (!res.ok || !data.success) throw new Error(data.message ?? "Greška pri kreiranju porudžbine.");
 
       clearCart();
+      localStorage.removeItem("appliedCoupon");
       setSubmitted(true);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Greška. Pokušajte ponovo.");
@@ -207,6 +260,11 @@ export default function NaruciPage() {
         </div>
       </div>
     );
+  }
+
+  // ── Not yet mounted (SSR) ─────────────────────────────────────────────────
+  if (!mounted) {
+    return <div className="min-h-screen" style={{ backgroundColor: "#fafafa" }} />;
   }
 
   // ── Empty cart ────────────────────────────────────────────────────────────
@@ -256,23 +314,63 @@ export default function NaruciPage() {
 
               {/* Personal info */}
               <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <User size={16} strokeWidth={1.8} className="text-zinc-400" />
-                  <h2 className="text-sm font-bold text-zinc-900">Lični podaci</h2>
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2">
+                    <User size={16} strokeWidth={1.8} className="text-zinc-400" />
+                    <h2 className="text-sm font-bold text-zinc-900">Lični podaci</h2>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        className="sr-only"
+                        checked={pravnoLice}
+                        onChange={(e) => setPravnoLice(e.target.checked)}
+                      />
+                      <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors duration-150 ${pravnoLice ? "border-[#e11d1b] bg-[#e11d1b]" : "border-zinc-300 bg-white"}`}>
+                        {pravnoLice && (
+                          <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+                            <path d="M1 3.5L3.5 6L8 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-xs font-medium text-zinc-600">Kupujem kao pravno lice</span>
+                  </label>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Field label="Ime i prezime" error={errors.ime}>
-                    <input type="text" value={form.ime} onChange={set("ime")} placeholder="Marko Marković"
+                  <Field label="Ime" error={errors.ime}>
+                    <input type="text" value={form.ime} onChange={set("ime")} placeholder="Marko"
                       className={inputCls(errors.ime)} />
+                  </Field>
+                  <Field label="Prezime" error={errors.prezime}>
+                    <input type="text" value={form.prezime} onChange={set("prezime")} placeholder="Marković"
+                      className={inputCls(errors.prezime)} />
                   </Field>
                   <Field label="Email adresa" error={errors.email}>
                     <input type="email" value={form.email} onChange={set("email")} placeholder="vas@email.com"
                       className={inputCls(errors.email)} />
                   </Field>
-                  <Field label="Kontakt telefon" error={errors.telefon} className="sm:col-span-2">
+                  <Field label="Kontakt telefon" error={errors.telefon}>
                     <input type="tel" value={form.telefon} onChange={set("telefon")} placeholder="+381 6x xxx xxxx"
                       className={inputCls(errors.telefon)} />
                   </Field>
+                  {pravnoLice && (
+                    <>
+                      <Field label="Naziv firme" error={errors.nazivFirme} className="sm:col-span-2">
+                        <input type="text" value={form.nazivFirme} onChange={set("nazivFirme")} placeholder="Naziv d.o.o."
+                          className={inputCls(errors.nazivFirme)} />
+                      </Field>
+                      <Field label="PIB" error={errors.pib}>
+                        <input type="text" value={form.pib} onChange={set("pib")} placeholder="101234567"
+                          className={inputCls(errors.pib)} />
+                      </Field>
+                      <Field label="Matični broj" error={errors.maticniBroj}>
+                        <input type="text" value={form.maticniBroj} onChange={set("maticniBroj")} placeholder="12345678"
+                          className={inputCls(errors.maticniBroj)} />
+                      </Field>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -419,12 +517,12 @@ export default function NaruciPage() {
                 <div className="px-5 py-4 border-t border-zinc-100 flex flex-col gap-1.5">
                   {appliedCoupon ? (
                     <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-100">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
                         <CheckCircle size={13} strokeWidth={2} className="text-emerald-500 shrink-0" />
                         <span className="text-xs font-semibold text-emerald-700">{appliedCoupon.code}</span>
-                        <span className="text-xs text-emerald-600">— {appliedCoupon.label}</span>
+                        <span className="text-xs text-emerald-600 truncate">— {appliedCoupon.label}</span>
                       </div>
-                      <button type="button" onClick={() => { setAppliedCoupon(null); setCouponError(""); }} className="text-emerald-400 hover:text-emerald-600 transition-colors cursor-pointer">
+                      <button type="button" onClick={() => { setAppliedCoupon(null); setCouponError(""); }} className="text-emerald-400 hover:text-emerald-600 transition-colors cursor-pointer shrink-0">
                         <X size={13} strokeWidth={2} />
                       </button>
                     </div>
@@ -442,11 +540,11 @@ export default function NaruciPage() {
                             className="w-full h-9 pl-7 pr-3 rounded-xl border border-zinc-200 bg-zinc-50 text-xs text-zinc-800 placeholder:text-zinc-400 outline-none focus:border-red-300 focus:ring-2 focus:ring-red-100 transition-all uppercase"
                           />
                         </div>
-                        <button type="button" onClick={applyCoupon}
-                          className="px-3 h-9 rounded-xl text-xs font-semibold text-white shrink-0 transition-opacity hover:opacity-90 cursor-pointer"
+                        <button type="button" onClick={applyCoupon} disabled={couponLoading}
+                          className="px-3 h-9 rounded-xl text-xs font-semibold text-white shrink-0 transition-opacity hover:opacity-90 cursor-pointer disabled:opacity-60"
                           style={{ backgroundColor: "#e11d1b" }}
                         >
-                          Primeni
+                          {couponLoading ? "..." : "Primeni"}
                         </button>
                       </div>
                       {couponError && <p className="text-xs text-red-500">{couponError}</p>}

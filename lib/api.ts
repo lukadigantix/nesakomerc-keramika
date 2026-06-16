@@ -362,10 +362,7 @@ export async function getFooterSettings(): Promise<ApiResponse<ApiFooterSettings
 }
 
 export async function getSlider(): Promise<ApiListResponse<ApiSlide>> {
-  "use cache";
-  cacheLife("hours");
-
-  return apiFetch<ApiListResponse<ApiSlide>>("/slider");
+  return apiFetch<ApiListResponse<ApiSlide>>("/slider", { cache: "no-store" });
 }
 
 export interface WorkingHoursDisplay {

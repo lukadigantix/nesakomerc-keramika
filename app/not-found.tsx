@@ -3,7 +3,7 @@ import { Home, ArrowRight } from "lucide-react";
 import Wrapper from "@/components/layout/Wrapper";
 
 export const metadata = {
-  title: "Stranica nije pronađena — Nesa Komerc Keramika",
+  title: "Stranica nije pronađena — Neša Komerc Keramika",
 };
 
 const links = [

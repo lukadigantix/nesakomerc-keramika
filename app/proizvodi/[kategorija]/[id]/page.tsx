@@ -13,7 +13,7 @@ import { Suspense } from "react";
 import Loading from "./loading";
 
 async function RecommendedProducts({ productId, kategorijaSlug, categoryName }: { productId: string; kategorijaSlug: string; categoryName: string }) {
-  const products = await getProductRecommended(productId, 8).catch(() => []);
+  const products = (await getProductRecommended(productId, 16).catch(() => [])).filter((p) => p.inStock).slice(0, 8);
   if (products.length === 0) return null;
   return (
     <ProductCarousel
@@ -45,7 +45,7 @@ export async function generateMetadata({
   try {
     const { data: product } = await getProductBySlug(id);
     return {
-      title: `${product.name} — Nesa Komerc Keramika`,
+      title: `${product.name} — Neša Komerc Keramika`,
       description: product.shortDescription ?? product.description ?? product.name,
     };
   } catch {
@@ -85,8 +85,8 @@ async function ProizvodPageContent({
   if (!category) notFound();
 
   // Related products: same category, exclude current
-  const relatedRes = await getProducts({ categoryId: category.id, limit: 10 });
-  const related = relatedRes.data.filter((p) => p.id !== product.id).slice(0, 8);
+  const relatedRes = await getProducts({ categoryId: category.id, limit: 20 });
+  const related = relatedRes.data.filter((p) => p.id !== product.id && p.inStock).slice(0, 8);
 
   const gallery = product.images.length > 0
     ? product.images

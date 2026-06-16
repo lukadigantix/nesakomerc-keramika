@@ -2,8 +2,8 @@ import Link from "next/link";
 import Wrapper from "@/components/layout/Wrapper";
 
 export const metadata = {
-  title: "Uslovi korišćenja — Nesa Komerc Keramika",
-  description: "Uslovi korišćenja veb stranice Nesa Komerc Keramika.",
+  title: "Uslovi korišćenja — Neša Komerc Keramika",
+  description: "Uslovi korišćenja veb stranice Neša Komerc Keramika.",
 };
 
 export default function UsloviKoristenjaPage() {
@@ -28,7 +28,7 @@ export default function UsloviKoristenjaPage() {
             <section>
               <h2 className="text-base font-bold text-zinc-950 mb-3">1. Opšte odredbe</h2>
               <p>Korišćenjem veb stranice <strong className="text-zinc-800">nesakomerckeramika.com</strong> prihvatate ove Uslove korišćenja u celosti. Ukoliko se ne slažete sa bilo kojim delom ovih uslova, molimo vas da prestanete sa korišćenjem stranice.</p>
-              <p className="mt-2">Operator stranice je <strong className="text-zinc-800">Nesa Komerc Keramika d.o.o.</strong>, Miloše Savića BB, Svilajnac, Srbija.</p>
+              <p className="mt-2">Operator stranice je <strong className="text-zinc-800">Neša Komerc Keramika d.o.o.</strong>, Miloše Savića BB, Svilajnac, Srbija.</p>
             </section>
 
             <section>
@@ -46,7 +46,7 @@ export default function UsloviKoristenjaPage() {
               <h2 className="text-base font-bold text-zinc-950 mb-3">3. Narudžbine i kupovina</h2>
               <ul className="flex flex-col gap-2 list-none">
                 <li>Sve cene su prikazane u dinarima (RSD) sa uračunatim PDV-om.</li>
-                <li>Potvrdom narudžbine zaključujete kupoprodajni ugovor sa Nesa Komerc Keramika d.o.o.</li>
+                <li>Potvrdom narudžbine zaključujete kupoprodajni ugovor sa Neša Komerc Keramika d.o.o.</li>
                 <li>Zadržavamo pravo da odbijemo ili otkažemo narudžbinu u slučaju greške u ceni, nedostupnosti proizvoda ili sumnje na prevaru.</li>
                 <li>Ukoliko se narudžbina otkaže, sve uplaćene iznose vraćamo u roku od 7 radnih dana.</li>
                 <li>Slike proizvoda su ilustrativnog karaktera — boje i dimenzije mogu blago da variraju zavisno od monitora.</li>
@@ -86,12 +86,12 @@ export default function UsloviKoristenjaPage() {
 
             <section>
               <h2 className="text-base font-bold text-zinc-950 mb-3">7. Intelektualna svojina</h2>
-              <p>Sav sadržaj na ovoj stranici — tekstovi, fotografije, logotipi, grafike i dizajn — vlasništvo su Nesa Komerc Keramika d.o.o. ili su korišćeni uz dozvolu. Zabranjeno je kopiranje, distribucija ili korišćenje bez pisane saglasnosti.</p>
+              <p>Sav sadržaj na ovoj stranici — tekstovi, fotografije, logotipi, grafike i dizajn — vlasništvo su Neša Komerc Keramika d.o.o. ili su korišćeni uz dozvolu. Zabranjeno je kopiranje, distribucija ili korišćenje bez pisane saglasnosti.</p>
             </section>
 
             <section>
               <h2 className="text-base font-bold text-zinc-950 mb-3">8. Ograničenje odgovornosti</h2>
-              <p>Nesa Komerc Keramika d.o.o. ne odgovara za:</p>
+              <p>Neša Komerc Keramika d.o.o. ne odgovara za:</p>
               <ul className="flex flex-col gap-2 list-none mt-2">
                 <li>Privremenu nedostupnost stranice usled tehničkih problema ili održavanja.</li>
                 <li>Štetu nastalu korišćenjem ili nemogućnošću korišćenja sadržaja stranice.</li>
@@ -111,7 +111,7 @@ export default function UsloviKoristenjaPage() {
 
             <section>
               <h2 className="text-base font-bold text-zinc-950 mb-3">11. Kontakt</h2>
-              <p className="mb-1"><strong className="text-zinc-800">Nesa Komerc Keramika d.o.o.</strong></p>
+              <p className="mb-1"><strong className="text-zinc-800">Neša Komerc Keramika d.o.o.</strong></p>
               <p>Miloše Savića BB, Svilajnac, Srbija</p>
               <p>E-mail: <a href="mailto:office@nesakomerckeramika.rs" className="text-zinc-950 underline">office@nesakomerckeramika.rs</a></p>
               <p>Telefon: <a href="tel:+381638815111" className="text-zinc-950 underline">+381 63 881 51 11</a></p>

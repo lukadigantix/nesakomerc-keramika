@@ -12,7 +12,7 @@ export default function AboutSection() {
               O nama
             </p>
             <h2 className="text-3xl font-bold text-zinc-950 leading-tight">
-              Nesa Komerc Keramika
+              Neša Komerc Keramika
               <br />
               <span className="text-zinc-400 font-light text-2xl">Vaš partner za uređenje kupatila</span>
             </h2>
@@ -20,18 +20,18 @@ export default function AboutSection() {
 
           {/* Right — body */}
           <div className="lg:col-span-7 lg:col-start-6 flex flex-col gap-5">
-            <p className="text-base text-zinc-500 leading-relaxed">
-              Nesa Komerc Keramika je porodična firma specijalizovana za prodaju i distribuciju
-              opreme za kupatilo — od keramičkih obloga do kompletnih instalacionih rešenja.
+            <p className="text-base text-justify text-zinc-500 leading-relaxed">
+              Neša Komerc Keramika je porodična firma specijalizovana za prodaju i distribuciju
+              opreme za kupatilo od keramičkih obloga do kompletnih instalacionih rešenja.
             </p>
-            <p className="text-base text-zinc-500 leading-relaxed">
+            <p className="text-base text-justify text-zinc-500 leading-relaxed">
               U našem salonu pronaćićete pažljivo odabran asortiman od preko{" "}
-              <span className="text-zinc-950 font-semibold">5.000 proizvoda</span> — baterije i
+              <span className="text-zinc-950 font-semibold">5.000 proizvoda</span> baterije i
               slavine, tuš kabine i kade, sanitarije, keramiku, ogledala i ormarićе, vertikale za
               peškire, slivnike i kompletnu galanteriju vodećih svetskih brendova.
             </p>
-            <p className="text-base text-zinc-500 leading-relaxed">
-              Godinama izgrađujemo odnos poverenja sa kupcima koji se vraćaju — jer znamo da uređenje
+            <p className="text-base text-justify text-zinc-500 leading-relaxed">
+              Godinama izgrađujemo odnos poverenja sa kupcima koji se vraćaju jer znamo da uređenje
               kupatila nije samo kupovina, već odluka u kojoj živite svaki dan.
             </p>
 

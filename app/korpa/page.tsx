@@ -23,12 +23,6 @@ function parsePriceStr(price: string): number {
   return Math.round(parseFloat(price) * 100) / 100 * 1 || 0;
 }
 
-const COUPONS: Record<string, { label: string; type: "percent" | "fixed"; value: number }> = {
-  NESA10:     { label: "10% popusta",      type: "percent", value: 10 },
-  DOBRODOSLI: { label: "1.000 RSD popusta", type: "fixed",   value: 1000 },
-  KERAMIKA15: { label: "15% popusta",      type: "percent", value: 15 },
-};
-
 const FREE_SHIPPING_THRESHOLD = 6000;
 
 function ShippingIcon({ type }: { type: string }) {
@@ -42,9 +36,28 @@ export default function KorpaPage() {
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<null | { code: string; label: string; type: "percent" | "fixed"; value: number }>(null);
   const [couponError, setCouponError] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
 
+  const [mounted, setMounted] = useState(false);
   const [shippingMethods, setShippingMethods] = useState<ApiShippingMethod[]>([]);
   const [selectedShippingId, setSelectedShippingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    try {
+      const saved = localStorage.getItem("appliedCoupon");
+      if (saved) setAppliedCoupon(JSON.parse(saved));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    if (appliedCoupon) {
+      localStorage.setItem("appliedCoupon", JSON.stringify(appliedCoupon));
+    } else {
+      localStorage.removeItem("appliedCoupon");
+    }
+  }, [appliedCoupon, mounted]);
 
   useEffect(() => {
     getShippingMethods()
@@ -56,16 +69,35 @@ export default function KorpaPage() {
       .catch(() => {/* keep empty, graceful fallback */});
   }, []);
 
-  function applyCoupon() {
+  async function applyCoupon() {
     const code = couponInput.trim().toUpperCase();
-    const match = COUPONS[code];
-    if (!match) {
-      setCouponError("Kupon nije pronađen ili je istekao.");
-      return;
-    }
-    setAppliedCoupon({ code, ...match });
+    if (!code) return;
     setCouponError("");
-    setCouponInput("");
+    setCouponLoading(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coupons/validate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, orderAmount: subtotal }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const c = data.data;
+        const type: "percent" | "fixed" = c.discountType === "percentage" ? "percent" : "fixed";
+        const value = parseFloat(c.discountValue);
+        const label = type === "percent"
+          ? `${value}% popusta`
+          : `${value.toLocaleString("sr-RS")} RSD popusta`;
+        setAppliedCoupon({ code, label, type, value });
+        setCouponInput("");
+      } else {
+        setCouponError(data.message ?? "Kupon nije pronađen ili je istekao.");
+      }
+    } catch {
+      setCouponError("Greška pri proveri kupona. Pokušajte ponovo.");
+    } finally {
+      setCouponLoading(false);
+    }
   }
 
   function removeCoupon() {
@@ -86,18 +118,22 @@ export default function KorpaPage() {
     ? (selectedMethod.type === "pickup" ? 0 : parsePriceStr(selectedMethod.price))
     : 0;
 
-  // Free shipping: any courier method becomes free above threshold
+  // Free shipping: only when API returns a freeAbove threshold
   const courierMethod = shippingMethods.find((m) => m.type === "courier");
   const freeThreshold = courierMethod?.freeAbove
     ? Math.round(parseFloat(courierMethod.freeAbove))
-    : FREE_SHIPPING_THRESHOLD;
-  const freeShippingProgress = Math.min((subtotal / freeThreshold) * 100, 100);
-  const remaining = Math.max(freeThreshold - subtotal, 0);
+    : null;
+  const freeShippingProgress = freeThreshold ? Math.min((subtotal / freeThreshold) * 100, 100) : 0;
+  const remaining = freeThreshold ? Math.max(freeThreshold - subtotal, 0) : null;
   const hasFreeCourier =
-    selectedMethod?.type === "courier" && subtotal >= freeThreshold;
+    freeThreshold !== null && selectedMethod?.type === "courier" && subtotal >= freeThreshold;
   const effectiveShipping = hasFreeCourier ? 0 : shippingPrice;
 
   const total = subtotal - discount + effectiveShipping;
+
+  if (!mounted) {
+    return <div className="min-h-screen" style={{ backgroundColor: "#fafafa" }} />;
+  }
 
   if (items.length === 0) {
     return (
@@ -216,8 +252,8 @@ export default function KorpaPage() {
             {/* ── Summary panel ── */}
             <div className="w-full lg:w-80 shrink-0 flex flex-col gap-4 lg:sticky lg:top-28">
 
-              {/* Free shipping progress */}
-              {remaining > 0 ? (
+              {/* Free shipping progress — only when freeAbove is set on API */}
+              {freeThreshold !== null && (remaining !== null && remaining > 0 ? (
                 <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm px-5 py-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-medium text-zinc-500">Do besplatne dostave</span>
@@ -238,7 +274,7 @@ export default function KorpaPage() {
                   <CheckCircle2 size={16} strokeWidth={2} className="text-emerald-500 shrink-0" />
                   <span className="text-xs font-semibold text-emerald-700">Kvalifikovani ste za besplatnu dostavu!</span>
                 </div>
-              )}
+              ))}
 
               {/* Main card */}
               <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
@@ -267,7 +303,7 @@ export default function KorpaPage() {
                     <div className="flex flex-col gap-2">
                       {shippingMethods.map((method) => {
                         const price = method.type === "pickup" ? 0 : parsePriceStr(method.price);
-                        const isFreeForOrder = method.type === "courier" && subtotal >= freeThreshold;
+                        const isFreeForOrder = method.type === "courier" && freeThreshold !== null && subtotal >= freeThreshold;
                         const isSelected = selectedShippingId === method.id;
                         return (
                           <button
@@ -310,12 +346,12 @@ export default function KorpaPage() {
                 <div className="px-6 pb-4 border-t border-zinc-100 pt-4">
                   {appliedCoupon ? (
                     <div className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-emerald-50 border border-emerald-100">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
                         <CheckCircle2 size={14} strokeWidth={2} className="text-emerald-500 shrink-0" />
                         <span className="text-xs font-semibold text-emerald-700">{appliedCoupon.code}</span>
-                        <span className="text-xs text-emerald-600">— {appliedCoupon.label}</span>
+                        <span className="text-xs text-emerald-600 truncate">— {appliedCoupon.label}</span>
                       </div>
-                      <button onClick={removeCoupon} className="text-emerald-400 hover:text-emerald-600 transition-colors cursor-pointer">
+                      <button onClick={removeCoupon} className="text-emerald-400 hover:text-emerald-600 transition-colors cursor-pointer shrink-0">
                         <X size={14} strokeWidth={2} />
                       </button>
                     </div>
@@ -335,10 +371,11 @@ export default function KorpaPage() {
                         </div>
                         <button
                           onClick={applyCoupon}
-                          className="px-3 h-9 rounded-xl text-xs font-semibold text-white shrink-0 transition-opacity hover:opacity-90 cursor-pointer"
+                          disabled={couponLoading}
+                          className="px-3 h-9 rounded-xl text-xs font-semibold text-white shrink-0 transition-opacity hover:opacity-90 cursor-pointer disabled:opacity-60"
                           style={{ backgroundColor: "#e11d1b" }}
                         >
-                          Primeni
+                          {couponLoading ? "..." : "Primeni"}
                         </button>
                       </div>
                       {couponError && <p className="text-xs text-red-500">{couponError}</p>}

@@ -14,7 +14,7 @@ import { Search } from "lucide-react";
 import { Suspense } from "react";
 
 export const metadata = {
-  title: "Svi proizvodi — Nesa Komerc Keramika",
+  title: "Svi proizvodi — Neša Komerc Keramika",
   description: "Pregledajte kompletan asortiman kupatilske opreme i keramike.",
 };
 
@@ -32,9 +32,11 @@ export default async function ProizvodiPage({
     cena_min?: string;
     cena_max?: string;
     sort?: string;
+    per_page?: string;
   }>;
 }) {
-  const { q, stranica, kategorija_id, brendovi, atributi, cena_min, cena_max, sort } = await searchParams;
+  const { q, stranica, kategorija_id, brendovi, atributi, cena_min, cena_max, sort, per_page } = await searchParams;
+  const perPage = per_page === "24" ? 24 : 12;
   const query = q?.trim() ?? "";
   const currentPage = Math.max(1, parseInt(stranica ?? "1", 10));
 
@@ -52,7 +54,7 @@ export default async function ProizvodiPage({
       getAttributes().catch(() => ({ success: true as const, data: [] })),
     ]);
 
-    const allSearchProducts = allSearchRes.data;
+    const allSearchProducts = allSearchRes.data.filter((p) => p.inStock);
     const attributes = attributesRes.data;
 
     // Build unique categories from search results
@@ -112,9 +114,15 @@ export default async function ProizvodiPage({
     if (minPrice !== undefined) filtered = filtered.filter((p) => parseFloat(p.price) >= minPrice);
     if (maxPrice !== undefined) filtered = filtered.filter((p) => parseFloat(p.price) <= maxPrice);
 
+    const searchEffectivePrice = (p: typeof filtered[0]) => parseFloat(p.salePrice ?? p.price);
+    if (sort === "cena_asc") filtered = [...filtered].sort((a, b) => searchEffectivePrice(a) - searchEffectivePrice(b));
+    else if (sort === "cena_desc") filtered = [...filtered].sort((a, b) => searchEffectivePrice(b) - searchEffectivePrice(a));
+    else if (sort === "naziv_asc") filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name, "sr"));
+    else if (sort === "naziv_desc") filtered = [...filtered].sort((a, b) => b.name.localeCompare(a.name, "sr"));
+
     const total = filtered.length;
-    const totalPages = Math.ceil(total / PER_PAGE) || 1;
-    const products = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
+    const totalPages = Math.ceil(total / perPage) || 1;
+    const products = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);
 
     // Faceted attribute counts (leave-one-out)
     const attrValueCounts: Record<string, Record<string, number>> = {};
@@ -209,6 +217,8 @@ export default async function ProizvodiPage({
       if (selectedBrandIds.length) params.set("brendovi", selectedBrandIds.join(","));
       if (cena_min) params.set("cena_min", cena_min);
       if (cena_max) params.set("cena_max", cena_max);
+      if (sort && sort !== "popularnost") params.set("sort", sort);
+      if (per_page) params.set("per_page", per_page);
       return `/proizvodi?${params.toString()}`;
     };
 
@@ -360,7 +370,7 @@ export default async function ProizvodiPage({
       getAttributes().catch(() => ({ success: true as const, data: [] })),
     ]);
 
-    const allNovoProducts = allNovoRes.data;
+    const allNovoProducts = allNovoRes.data.filter((p) => p.inStock);
     const attributes = attributesRes.data;
 
     const novoBrandIds = new Set(allNovoProducts.map((p) => p.brandId));
@@ -395,8 +405,8 @@ export default async function ProizvodiPage({
     if (maxPrice !== undefined) filtered = filtered.filter((p) => parseFloat(p.price) <= maxPrice);
 
     const total = filtered.length;
-    const totalPages = Math.ceil(total / PER_PAGE) || 1;
-    const products = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
+    const totalPages = Math.ceil(total / perPage) || 1;
+    const products = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);
 
     // Faceted attribute counts
     const attrValueCounts: Record<string, Record<string, number>> = {};
@@ -459,6 +469,7 @@ export default async function ProizvodiPage({
       if (selectedBrandIds.length) params.set("brendovi", selectedBrandIds.join(","));
       if (cena_min) params.set("cena_min", cena_min);
       if (cena_max) params.set("cena_max", cena_max);
+      if (per_page) params.set("per_page", per_page);
       return `/proizvodi?${params.toString()}`;
     };
 

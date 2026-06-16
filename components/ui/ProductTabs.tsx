@@ -51,7 +51,7 @@ export default function ProductTabs({ description, productName, categoryLabel, s
             </p>
             <p>
               Svaki komad prolazi kroz rigoroznu kontrolu kvaliteta pre isporuke, uz garanciju
-              proizvođača i punu tehničku podršku tima Nesa Komerc Keramika.
+              proizvođača i punu tehničku podršku tima Neša Komerc Keramika.
             </p>
           </div>
         )}

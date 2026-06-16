@@ -12,7 +12,7 @@ import MobileFilterDrawer from "@/components/ui/MobileFilterDrawer";
 import ProductGridClient from "@/components/ui/ProductGridClient";
 
 export const metadata = {
-  title: "Rasprodaja — Nesa Komerc Keramika",
+  title: "Rasprodaja — Neša Komerc Keramika",
   description: "Pogledajte proizvode na rasprodaji — najveći popusti na odabrane artikle.",
 };
 
@@ -27,10 +27,12 @@ export default async function RasprodajaPage({
     cena_min?: string;
     cena_max?: string;
     atributi?: string;
-    sortBy?: string;
+    sort?: string;
+    per_page?: string;
   }>;
 }) {
-  const { stranica, brendovi, cena_min, cena_max, atributi, sortBy } = await searchParams;
+  const { stranica, brendovi, cena_min, cena_max, atributi, sort, per_page } = await searchParams;
+  const perPage = per_page === "24" ? 24 : 12;
 
   const currentPage = Math.max(1, parseInt(stranica ?? "1", 10));
   const selectedBrandIds = brendovi?.split(",").filter(Boolean) ?? [];
@@ -45,23 +47,22 @@ export default async function RasprodajaPage({
     })
     .filter((x): x is { attrName: string; value: string } => x !== null);
 
-  const validSortBy = ["price_asc", "price_desc", "newest"].includes(sortBy ?? "")
-    ? (sortBy as "price_asc" | "price_desc" | "newest")
-    : "newest";
+  const needsNameSort = sort === "naziv_asc" || sort === "naziv_desc";
+  const apiSortBy = sort === "cena_asc" ? "price_asc" : sort === "cena_desc" ? "price_desc" : "newest";
 
   const [clearanceRes, filtersRes] = await Promise.all([
     getClearanceProducts({
       brandId: selectedBrandIds[0],
       minPrice,
       maxPrice,
-      sortBy: validSortBy,
-      page: currentPage,
-      limit: PER_PAGE,
+      sortBy: apiSortBy,
+      page: needsNameSort ? 1 : currentPage,
+      limit: needsNameSort ? 999 : perPage,
     }).catch(() => ({ success: false, data: [], meta: undefined })),
     getClearanceFilters().catch(() => ({ brands: [], priceRange: { min: 0, max: 200000 }, attributes: [] })),
   ]);
 
-  let products = clearanceRes.data;
+  let products = clearanceRes.data.filter((p) => p.inStock);
 
   // Client-side attribute filtering
   if (selectedPairs.length > 0) {
@@ -82,8 +83,12 @@ export default async function RasprodajaPage({
     products = products.filter((p) => selectedBrandIds.includes(p.brandId));
   }
 
-  const total = clearanceRes.meta?.total ?? products.length;
-  const totalPages = (clearanceRes.meta?.totalPages ?? Math.ceil(total / PER_PAGE)) || 1;
+  if (sort === "naziv_asc") products = [...products].sort((a, b) => a.name.localeCompare(b.name, "sr"));
+  else if (sort === "naziv_desc") products = [...products].sort((a, b) => b.name.localeCompare(a.name, "sr"));
+
+  const total = needsNameSort ? products.length : (clearanceRes.meta?.total ?? products.length);
+  const totalPages = needsNameSort ? Math.ceil(products.length / perPage) || 1 : (clearanceRes.meta?.totalPages ?? Math.ceil(total / perPage)) || 1;
+  if (needsNameSort) products = products.slice((currentPage - 1) * perPage, currentPage * perPage);
 
   const brandObjects = filtersRes.brands;
   const facetedAttributes = filtersRes.attributes.filter((a) => a.values.length > 0);
@@ -98,7 +103,8 @@ export default async function RasprodajaPage({
     if (cena_min) params.set("cena_min", cena_min);
     if (cena_max) params.set("cena_max", cena_max);
     if (selectedAttrEncoded.length) params.set("atributi", selectedAttrEncoded.join(","));
-    if (sortBy) params.set("sortBy", sortBy);
+    if (sort && sort !== "popularnost") params.set("sort", sort);
+    if (per_page) params.set("per_page", per_page);
     return `/rasprodaja?${params.toString()}`;
   };
 

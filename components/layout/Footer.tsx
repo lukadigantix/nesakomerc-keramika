@@ -13,10 +13,10 @@ interface FooterCategory {
 
 const company = [
   { label: "O nama", href: "/o-nama" },
-  { label: "Naši brendovi", href: "/brendovi" },
-  { label: "Usluge", href: "/usluge" },
+  { label: "Proizvodi", href: "/proizvodi" },
+  { label: "Naši brendovi", href: null },
   { label: "Mesečna akcija", href: "/akcija" },
-  { label: "Blog", href: "/blog" },
+  { label: "Rasprodaja", href: "/rasprodaja" },
   { label: "Kontakt", href: "/kontakt" },
 ];
 
@@ -63,7 +63,7 @@ export default function Footer({ categories, settings, workingHours }: { categor
             <Link href="/">
               <Image
                 src="/nesa-komerc-logo.svg"
-                alt="Nesa Komerc Keramika"
+                alt="Neša Komerc Keramika"
                 width={270}
                 height={81}
                 className="h-20 w-auto"
@@ -108,6 +108,19 @@ export default function Footer({ categories, settings, workingHours }: { categor
                   {contact.street && contact.city ? `${contact.street}, ${contact.city}` : contact.city || "35210 Svilajnac, Srbija"}
                 </span>
               </div>
+              {(contact.pib || contact.mb) && (
+                <div className="flex items-center gap-3 text-sm text-white/70">
+                  <span className="flex items-center justify-center w-8 h-8 rounded-full border border-white/20 shrink-0">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
+                  </span>
+                  <span className="leading-relaxed">
+                    {contact.pib && <span className="block">PIB: {contact.pib}</span>}
+                    {contact.mb && <span className="block">MB: {contact.mb}</span>}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Working hours */}
@@ -162,15 +175,21 @@ export default function Footer({ categories, settings, workingHours }: { categor
               Kompanija
             </p>
             <div className="flex flex-col gap-3">
-              {company.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="text-sm text-white/70 hover:text-white transition-colors duration-150"
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {company.map((item) =>
+                item.href ? (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="text-sm text-white/70 hover:text-white transition-colors duration-150"
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <span key={item.label} className="text-sm text-white/70">
+                    {item.label}
+                  </span>
+                )
+              )}
             </div>
           </div>
 
@@ -253,7 +272,7 @@ export default function Footer({ categories, settings, workingHours }: { categor
         <Wrapper>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-6 gap-3 sm:gap-4">
             <p className="text-xs text-white/50">
-              © {new Date().getFullYear()} Nesa Komerc Keramika. Sva prava zadržana.
+              © {new Date().getFullYear()} Neša Komerc Keramika. Sva prava zadržana.
             </p>
             <div className="flex items-center gap-6">
               {legal.map((item) => (

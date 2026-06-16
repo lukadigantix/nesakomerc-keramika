@@ -3,9 +3,9 @@ import { formatPrice } from "@/lib/utils";
 import ProductCarousel from "@/components/ui/ProductCarousel";
 
 export default async function FeaturedProducts() {
-  const { data: products } = await getProducts({ isFeatured: true, limit: 12 });
+  const { data: products } = await getProducts({ isFeatured: true, limit: 24 });
 
-  const items = products.map((p) => ({
+  const items = products.filter((p) => p.inStock).slice(0, 12).map((p) => ({
     id: p.id,
     name: p.name,
     category: p.category?.name ?? "",

@@ -4,8 +4,8 @@ import { AlertCircle, Clock, CheckCircle2, RefreshCw, Phone, Mail } from "lucide
 import ReklamacijaForm from "@/components/ui/ReklamacijaForm";
 
 export const metadata = {
-  title: "Reklamacije — Nesa Komerc Keramika",
-  description: "Podnošenje reklamacije za kupljene proizvode — Nesa Komerc Keramika.",
+  title: "Reklamacije — Neša Komerc Keramika",
+  description: "Podnošenje reklamacije za kupljene proizvode — Neša Komerc Keramika.",
 };
 
 export default function ReklamacijePage() {

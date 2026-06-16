@@ -21,7 +21,7 @@ export async function generateMetadata({
   try {
     const { data: category } = await getCategoryBySlug(kategorija);
     return {
-      title: `${category.name} — Nesa Komerc Keramika`,
+      title: `${category.name} — Neša Komerc Keramika`,
       description: `Pregledajte naš asortiman u kategoriji ${category.name}.`,
     };
   } catch {
@@ -36,11 +36,12 @@ export default async function KategorijaPage({
   searchParams,
 }: {
   params: Promise<{ kategorija: string }>;
-  searchParams: Promise<{ stranica?: string; atributi?: string; cena_min?: string; cena_max?: string; brendovi?: string }>;
+  searchParams: Promise<{ stranica?: string; atributi?: string; cena_min?: string; cena_max?: string; brendovi?: string; sort?: string; per_page?: string }>;
 }) {
   const { kategorija } = await params;
-  const { stranica, atributi, cena_min, cena_max, brendovi } = await searchParams;
+  const { stranica, atributi, cena_min, cena_max, brendovi, sort, per_page } = await searchParams;
   const currentPage = Math.max(1, parseInt(stranica ?? "1", 10));
+  const perPage = per_page === "24" ? 24 : 12;
   const selectedBrandIds = brendovi?.split(",").filter(Boolean) ?? [];
   const minPrice = cena_min ? Number(cena_min) : undefined;
   const maxPrice = cena_max ? Number(cena_max) : undefined;
@@ -63,7 +64,7 @@ export default async function KategorijaPage({
   ]);
 
   // --- Client-side filtering ---
-  const allCatProducts = allCatProductsRes.data;
+  const allCatProducts = allCatProductsRes.data.filter((p) => p.inStock);
   const categories = categoriesRes.data;
   const subcategories = categories.filter((cat) => cat.parentId === category.id);
 
@@ -120,9 +121,22 @@ export default async function KategorijaPage({
   if (minPrice !== undefined) filtered = filtered.filter((p) => parseFloat(p.price) >= minPrice);
   if (maxPrice !== undefined) filtered = filtered.filter((p) => parseFloat(p.price) <= maxPrice);
 
+  const effectivePrice = (p: typeof allCatProducts[0]) =>
+    parseFloat(p.clearancePrice ?? p.salePrice ?? p.price);
+
+  if (sort === "cena_asc") {
+    filtered = [...filtered].sort((a, b) => effectivePrice(a) - effectivePrice(b));
+  } else if (sort === "cena_desc") {
+    filtered = [...filtered].sort((a, b) => effectivePrice(b) - effectivePrice(a));
+  } else if (sort === "naziv_asc") {
+    filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name, "sr"));
+  } else if (sort === "naziv_desc") {
+    filtered = [...filtered].sort((a, b) => b.name.localeCompare(a.name, "sr"));
+  }
+
   const total = filtered.length;
-  const totalPages = Math.ceil(total / 12) || 1;
-  const products = filtered.slice((currentPage - 1) * 12, currentPage * 12);
+  const totalPages = Math.ceil(total / perPage) || 1;
+  const products = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);
 
   // Faceted counts per attribute (leave-one-out: show what would match if THIS attr's filter is lifted)
   const attrValueCounts: Record<string, Record<string, number>> = {};
@@ -270,6 +284,8 @@ export default async function KategorijaPage({
                   if (selectedBrandIds.length) params.set("brendovi", selectedBrandIds.join(","));
                   if (cena_min) params.set("cena_min", cena_min);
                   if (cena_max) params.set("cena_max", cena_max);
+                  if (sort) params.set("sort", sort);
+                  if (per_page) params.set("per_page", per_page);
                   return `/proizvodi/${kategorija}?${params.toString()}`;
                 }}
               />

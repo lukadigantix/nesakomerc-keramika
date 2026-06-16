@@ -3,8 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, MapPin } from "lucide-react";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
-
 export interface GeoCity {
   name: string;
   displayName: string;
@@ -46,6 +44,54 @@ interface AddressProps {
 
 type Props = CityProps | AddressProps;
 
+interface NominatimResult {
+  display_name: string;
+  lat: string;
+  lon: string;
+  address: {
+    city?: string;
+    town?: string;
+    village?: string;
+    municipality?: string;
+    postcode?: string;
+    road?: string;
+    house_number?: string;
+  };
+}
+
+async function searchCities(q: string): Promise<GeoCity[]> {
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&countrycodes=rs&format=json&addressdetails=1&limit=7`;
+  const res = await fetch(url, { headers: { "Accept-Language": "sr-Latn,sr;q=0.9" } });
+  if (!res.ok) throw new Error("nominatim error");
+  const data: NominatimResult[] = await res.json();
+  return data
+    .filter((item) => item.address.city || item.address.town || item.address.village || item.address.municipality)
+    .map((item) => ({
+      name: item.address.city ?? item.address.town ?? item.address.village ?? item.address.municipality ?? q,
+      displayName: item.display_name,
+      lat: item.lat,
+      lon: item.lon,
+      postcode: item.address.postcode,
+    }));
+}
+
+async function searchAddresses(q: string, city?: string): Promise<GeoAddress[]> {
+  const query = city ? `${q}, ${city}, Srbija` : `${q}, Srbija`;
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&countrycodes=rs&format=json&addressdetails=1&limit=7`;
+  const res = await fetch(url, { headers: { "Accept-Language": "sr-Latn,sr;q=0.9" } });
+  if (!res.ok) throw new Error("nominatim error");
+  const data: NominatimResult[] = await res.json();
+  return data.map((item) => ({
+    displayName: item.display_name,
+    road: item.address.road ?? "",
+    houseNumber: item.address.house_number,
+    postcode: item.address.postcode,
+    city: item.address.city ?? item.address.town ?? item.address.village,
+    lat: item.lat,
+    lon: item.lon,
+  }));
+}
+
 export default function GeoAutocomplete(props: Props) {
   const { type, value, onChange, placeholder, className, error } = props;
   const [suggestions, setSuggestions] = useState<GeoCity[] | GeoAddress[]>([]);
@@ -57,7 +103,6 @@ export default function GeoAutocomplete(props: Props) {
 
   const minLen = type === "city" ? 2 : 3;
 
-  // Close on outside click
   useEffect(() => {
     function handle(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -80,27 +125,23 @@ export default function GeoAutocomplete(props: Props) {
     timerRef.current = setTimeout(async () => {
       setLoading(true);
       try {
-        let url: string;
         if (type === "city") {
-          url = `${API_BASE}/geo/cities?q=${encodeURIComponent(q)}`;
+          const results = await searchCities(q);
+          setSuggestions(results);
+          setOpen(results.length > 0);
         } else {
           const city = (props as AddressProps).cityFilter ?? "";
-          url = `${API_BASE}/geo/addresses?q=${encodeURIComponent(q)}${city ? `&city=${encodeURIComponent(city)}` : ""}`;
+          const results = await searchAddresses(q, city);
+          setSuggestions(results);
+          setOpen(results.length > 0);
         }
-        const res = await fetch(url);
-        if (!res.ok) { setApiDown(true); return; }
-        const json = await res.json();
         setApiDown(false);
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          setSuggestions(json.data);
-          setOpen(true);
-        }
       } catch {
         setApiDown(true);
       } finally {
         setLoading(false);
       }
-    }, 350);
+    }, 400);
   }
 
   function handleSelect(item: GeoCity | GeoAddress) {
@@ -143,11 +184,10 @@ export default function GeoAutocomplete(props: Props) {
       {open && suggestions.length > 0 && (
         <ul className="absolute z-50 mt-1 w-full bg-white rounded-xl border border-zinc-200 shadow-lg overflow-hidden">
           {(suggestions as (GeoCity & GeoAddress)[]).map((item, i) => {
-            const label = item.displayName;
-            const sub =
-              type === "city"
-                ? item.postcode ?? ""
-                : [item.city, item.postcode].filter(Boolean).join(", ");
+            const label = type === "city" ? item.name : (item.road ? [item.road, item.houseNumber].filter(Boolean).join(" ") : item.displayName);
+            const sub = type === "city"
+              ? [item.postcode, "Srbija"].filter(Boolean).join(", ")
+              : [item.city, item.postcode].filter(Boolean).join(", ");
             return (
               <li key={i}>
                 <button

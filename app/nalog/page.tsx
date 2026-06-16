@@ -94,7 +94,7 @@ export default function NalogPage() {
               Dobrodošli<br />nazad
             </h1>
             <p className="text-base mb-10" style={{ color: "rgba(255,255,255,0.75)" }}>
-              Prijavite se i pristupite svim pogodnostima<br />Nesa Komerc Keramika naloga.
+              Prijavite se i pristupite svim pogodnostima<br />Neša Komerc Keramika naloga.
             </p>
             <div className="flex flex-col gap-4">
               {perks.map(({ icon: Icon, text }) => (
@@ -112,7 +112,7 @@ export default function NalogPage() {
           </div>
 
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
-            © 2026 Nesa Komerc Keramika
+            © 2026 Neša Komerc Keramika
           </p>
         </div>
 

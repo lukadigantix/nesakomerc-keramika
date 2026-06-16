@@ -71,6 +71,21 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
 
 const DEFAULT_ICON = TileIcon;
 
+function isIconUrl(icon: string): boolean {
+  return icon.startsWith("http://") || icon.startsWith("https://") || icon.startsWith("/");
+}
+
+function CategoryIcon({ icon, slug, size = 18 }: { icon?: string | null; slug: string; size?: number }) {
+  if (icon && isIconUrl(icon)) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={icon} alt="" width={size} height={size} className="object-contain" />
+    );
+  }
+  const Icon = (icon ? ICON_MAP[icon] : null) ?? ICON_MAP[slug] ?? DEFAULT_ICON;
+  return <Icon size={size} strokeWidth={1.5} />;
+}
+
 interface NavCategory { label: string; slug: string; icon?: string | null; children?: { label: string; slug: string; icon?: string | null }[]; }
 
 const navLinks = [
@@ -264,9 +279,7 @@ export default function Navbar({ categories }: { categories: NavCategory[] }) {
             <div className="py-10">
               <p className="text-xl font-bold text-zinc-950 mb-7">Kategorije</p>
               <div className="grid grid-cols-4 gap-x-8 gap-y-4 pb-2">
-                {categories.map((category) => {
-                    const Icon = (category.icon ? ICON_MAP[category.icon] : null) ?? ICON_MAP[category.slug] ?? DEFAULT_ICON;
-                    return (
+                {categories.map((category) => (
                   <Link
                     key={category.slug}
                     href={`/proizvodi/${category.slug}`}
@@ -275,12 +288,11 @@ export default function Navbar({ categories }: { categories: NavCategory[] }) {
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = ""; (e.currentTarget as HTMLElement).style.color = ""; }}
                   >
                     <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-zinc-100 group-hover:bg-white/20 transition-colors duration-150 shrink-0 text-zinc-950 group-hover:text-white">
-                      <Icon size={18} strokeWidth={1.5} />
+                      <CategoryIcon icon={category.icon} slug={category.slug} size={18} />
                     </span>
                     <span className="text-sm font-medium leading-tight">{category.label}</span>
                   </Link>
-                    );
-                  })}
+                ))}
               </div>
             </div>
           </Wrapper>
@@ -344,21 +356,18 @@ export default function Navbar({ categories }: { categories: NavCategory[] }) {
                 >
                   Svi proizvodi
                 </Link>
-                {categories.map((cat) => {
-                    const Icon = (cat.icon ? ICON_MAP[cat.icon] : null) ?? ICON_MAP[cat.slug] ?? DEFAULT_ICON;
-                    return (
+                {categories.map((cat) => (
                   <Link
                     key={cat.slug}
                     href={`/proizvodi/${cat.slug}`}
                     className="flex items-center gap-3 h-10 px-3 rounded-lg text-sm text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-colors duration-150"
                   >
                     <span className="w-6 h-6 flex items-center justify-center rounded-md bg-zinc-100 text-zinc-600 shrink-0">
-                      <Icon size={14} strokeWidth={1.5} />
+                      <CategoryIcon icon={cat.icon} slug={cat.slug} size={14} />
                     </span>
                     {cat.label}
                   </Link>
-                    );
-                  })}
+                ))}
               </div>
             )}
           </div>
