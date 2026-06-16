@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node --max-old-space-size=128 --max-semi-space-size=2 server.js",
     "lint": "eslint"
   },
   "dependencies": {

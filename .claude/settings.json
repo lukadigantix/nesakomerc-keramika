@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const next = require\\('/Users/aleksandar/Desktop/nesakomerckeramika-shop/nesakomerc-keramika/node_modules/next/package.json'\\); console.log\\(next.version\\)\")"
+    ]
+  }
+}
