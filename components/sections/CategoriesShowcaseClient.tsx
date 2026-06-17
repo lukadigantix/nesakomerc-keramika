@@ -108,9 +108,9 @@ export default function CategoriesShowcaseClient({ categories }: { categories: C
               />
               <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent" />
               <div className="absolute bottom-8 left-8 right-4">
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white leading-tight">{cat.title}</p>
+                <p className="text-base sm:text-lg lg:text-xl font-bold text-white leading-tight">{cat.title}</p>
                 {cat.subtitle && (
-                  <p className="text-sm text-white/70 mt-1">{cat.subtitle}</p>
+                  <p className="text-xs text-white/70 mt-1">{cat.subtitle}</p>
                 )}
               </div>
             </Link>

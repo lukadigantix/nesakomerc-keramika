@@ -14,7 +14,7 @@ interface FooterCategory {
 const company = [
   { label: "O nama", href: "/o-nama" },
   { label: "Proizvodi", href: "/proizvodi" },
-  { label: "Naši brendovi", href: null },
+  { label: "Naši brendovi", href: "/nasi-brendovi" },
   { label: "Mesečna akcija", href: "/akcija" },
   { label: "Rasprodaja", href: "/rasprodaja" },
   { label: "Kontakt", href: "/kontakt" },

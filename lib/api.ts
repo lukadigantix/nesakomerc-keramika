@@ -173,9 +173,6 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 export async function getProducts(
   query: ProductsQuery = {}
 ): Promise<ApiListResponse<ApiProduct>> {
-  "use cache";
-  cacheLife("minutes");
-
   const params = new URLSearchParams();
   if (query.categoryId) params.set("categoryId", query.categoryId);
   if (query.attributeValueIds?.length) {
@@ -195,7 +192,7 @@ export async function getProducts(
   params.set("page", String(query.page ?? 1));
   params.set("limit", String(query.limit ?? 20));
 
-  return apiFetch<ApiListResponse<ApiProduct>>(`/products?${params.toString()}`).then(fixProducts);
+  return apiFetch<ApiListResponse<ApiProduct>>(`/products?${params.toString()}`, { cache: "no-store" }).then(fixProducts);
 }
 
 export async function getProductById(id: string): Promise<ApiResponse<ApiProduct>> {
@@ -213,10 +210,7 @@ export async function getProductBySlug(slug: string): Promise<ApiResponse<ApiPro
 }
 
 export async function getProductRecommended(productId: string, limit = 8): Promise<ApiProduct[]> {
-  "use cache";
-  cacheLife("hours");
-
-  const res = await apiFetch<ApiListResponse<ApiProduct>>(`/products/${productId}/recommended?limit=${limit}`);
+  const res = await apiFetch<ApiListResponse<ApiProduct>>(`/products/${productId}/recommended?limit=${limit}`, { cache: "no-store" });
   return res.data.map(fixProduct);
 }
 
@@ -293,10 +287,7 @@ export async function getClearanceFilters(): Promise<ApiOnSaleFilters> {
 // ─── Categories ───────────────────────────────────────────────────────────────
 
 export async function getCategories(): Promise<ApiListResponse<ApiCategory>> {
-  "use cache";
-  cacheLife("days");
-
-  return apiFetch<ApiListResponse<ApiCategory>>("/categories");
+  return apiFetch<ApiListResponse<ApiCategory>>("/categories", { cache: "no-store" });
 }
 
 export async function getCategoryTree(): Promise<ApiListResponse<ApiCategory>> {

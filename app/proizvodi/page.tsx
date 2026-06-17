@@ -530,6 +530,173 @@ export default async function ProizvodiPage({
     );
   }
 
+  // ── Brand mode ───────────────────────────────────────────────────────────────
+  if (brendovi && query.length < 2) {
+    const selectedBrandIds = brendovi.split(",").filter(Boolean);
+    const minPrice = cena_min ? Number(cena_min) : undefined;
+    const maxPrice = cena_max ? Number(cena_max) : undefined;
+
+    const selectedPairs = (atributi?.split(",").filter(Boolean) ?? [])
+      .map((s) => { const idx = s.indexOf("|"); return idx === -1 ? null : { attrName: s.slice(0, idx), value: s.slice(idx + 1) }; })
+      .filter((x): x is { attrName: string; value: string } => x !== null);
+    const selectedByAttrName = new Map<string, string[]>();
+    for (const { attrName, value } of selectedPairs) {
+      if (!selectedByAttrName.has(attrName)) selectedByAttrName.set(attrName, []);
+      selectedByAttrName.get(attrName)!.push(value);
+    }
+
+    const [allBrandRes, brandsRes, attributesRes] = await Promise.all([
+      getProducts({ limit: 9999 }),
+      getActiveBrands(),
+      getAttributes().catch(() => ({ success: true as const, data: [] })),
+    ]);
+
+    const allBrandProducts = allBrandRes.data.filter((p) => p.inStock && selectedBrandIds.includes(p.brandId));
+    const brand = brandsRes.data.find((b) => b.id === selectedBrandIds[0]);
+    const attributes = attributesRes.data;
+
+    const specByKey = new Map<string, Set<string>>();
+    for (const p of allBrandProducts) {
+      for (const s of p.specifications) {
+        if (!specByKey.has(s.key)) specByKey.set(s.key, new Set());
+        specByKey.get(s.key)!.add(s.value);
+      }
+    }
+    const brandAttributes = attributes
+      .filter((a) => (specByKey.get(a.name)?.size ?? 0) > 0)
+      .map((a) => ({
+        ...a,
+        values: [...(specByKey.get(a.name) ?? [])]
+          .sort((a, b) => a.localeCompare(b, "sr"))
+          .map((v) => ({ id: `${a.id}::${v}`, value: v, sortOrder: 0, attributeId: a.id })),
+      }));
+
+    const matchesAttrFilter = (p: (typeof allBrandProducts)[0]) =>
+      [...selectedByAttrName.entries()].every(([attrName, vals]) =>
+        vals.some((v) => p.specifications.some((s) => s.key === attrName && s.value === v))
+      );
+
+    let filtered = allBrandProducts;
+    if (selectedPairs.length) filtered = filtered.filter(matchesAttrFilter);
+    if (minPrice !== undefined) filtered = filtered.filter((p) => parseFloat(p.price) >= minPrice);
+    if (maxPrice !== undefined) filtered = filtered.filter((p) => parseFloat(p.price) <= maxPrice);
+
+    const effectivePrice = (p: (typeof filtered)[0]) => parseFloat(p.salePrice ?? p.price);
+    if (sort === "cena_asc") filtered = [...filtered].sort((a, b) => effectivePrice(a) - effectivePrice(b));
+    else if (sort === "cena_desc") filtered = [...filtered].sort((a, b) => effectivePrice(b) - effectivePrice(a));
+    else if (sort === "naziv_asc") filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name, "sr"));
+    else if (sort === "naziv_desc") filtered = [...filtered].sort((a, b) => b.name.localeCompare(a.name, "sr"));
+
+    const total = filtered.length;
+    const totalPages = Math.ceil(total / perPage) || 1;
+    const products = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);
+
+    const attrValueCounts: Record<string, Record<string, number>> = {};
+    for (const attr of brandAttributes) {
+      const otherPairs = selectedPairs.filter((p) => p.attrName !== attr.name);
+      const otherByAttrName = new Map<string, string[]>();
+      for (const { attrName, value } of otherPairs) {
+        if (!otherByAttrName.has(attrName)) otherByAttrName.set(attrName, []);
+        otherByAttrName.get(attrName)!.push(value);
+      }
+      let facetBase = allBrandProducts;
+      if (otherByAttrName.size) {
+        facetBase = facetBase.filter((p) =>
+          [...otherByAttrName.entries()].every(([attrName, vals]) =>
+            vals.some((v) => p.specifications.some((s) => s.key === attrName && s.value === v))
+          )
+        );
+      }
+      if (minPrice !== undefined) facetBase = facetBase.filter((p) => parseFloat(p.price) >= minPrice);
+      if (maxPrice !== undefined) facetBase = facetBase.filter((p) => parseFloat(p.price) <= maxPrice);
+      const groupCounts: Record<string, number> = {};
+      const seen = new Set<string>();
+      for (const p of facetBase) {
+        for (const spec of p.specifications) {
+          if (spec.key === attr.name) {
+            const uid = `${p.id}::${spec.value}`;
+            if (!seen.has(uid)) { seen.add(uid); groupCounts[spec.value] = (groupCounts[spec.value] ?? 0) + 1; }
+          }
+        }
+      }
+      attrValueCounts[attr.id] = groupCounts;
+    }
+
+    const selectedAttrEncoded = selectedPairs.map(({ attrName, value }) => `${attrName}|${value}`);
+    const selectedEncodedSet = new Set(selectedAttrEncoded);
+    const facetedAttributes = brandAttributes
+      .map((a) => ({ ...a, values: a.values.filter((v) => selectedEncodedSet.has(`${a.name}|${v.value}`) || (attrValueCounts[a.id]?.[v.value] ?? 0) > 0) }))
+      .filter((a) => a.values.length > 0);
+
+    const hasActiveFilters = selectedAttrEncoded.length > 0 || !!cena_min || !!cena_max;
+
+    const buildBrandHref = (p: number) => {
+      const params = new URLSearchParams();
+      params.set("brendovi", brendovi);
+      params.set("stranica", String(p));
+      if (selectedAttrEncoded.length) params.set("atributi", selectedAttrEncoded.join(","));
+      if (cena_min) params.set("cena_min", cena_min);
+      if (cena_max) params.set("cena_max", cena_max);
+      if (sort && sort !== "popularnost") params.set("sort", sort);
+      if (per_page) params.set("per_page", per_page);
+      return `/proizvodi?${params.toString()}`;
+    };
+
+    return (
+      <div className="min-h-screen" style={{ backgroundColor: "#fafafa" }}>
+        <div className="pt-28 pb-8" style={{ background: "linear-gradient(to right, #e11d1b, #f97316)" }}>
+          <Wrapper>
+            <div className="flex items-center gap-2 text-xs mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>
+              <Link href="/" className="hover:text-white transition-colors duration-150">Početna</Link>
+              <span>/</span>
+              <Link href="/nasi-brendovi" className="hover:text-white transition-colors duration-150">Naši brendovi</Link>
+              <span>/</span>
+              <span className="text-white">{brand?.name ?? "Brend"}</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{brand?.name ?? "Brend"}</h1>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>{total} proizvoda</p>
+          </Wrapper>
+        </div>
+        <div className="pt-10 pb-16">
+          <Wrapper>
+            <div className="flex gap-12">
+              <aside className="hidden min-[1330px]:flex w-56 shrink-0 flex-col gap-0 pt-[49px]">
+                <Suspense><PriceRangeFilter /></Suspense>
+                <Suspense><AttributeFilter attributes={facetedAttributes} selectedValues={selectedAttrEncoded} countsPerAttr={attrValueCounts} /></Suspense>
+              </aside>
+              <ProductGridClient
+                products={products.map((p) => ({
+                  id: p.id,
+                  name: p.name,
+                  category: p.category?.name ?? "",
+                  price: formatPrice(p.salePrice ?? p.price),
+                  originalPrice: p.salePrice ? formatPrice(p.price) : undefined,
+                  image: p.images[0] ?? "/images/img4.png",
+                  href: `/proizvodi/${p.category?.slug ?? ""}/${p.slug}`,
+                  badge: (p.saleDiscountPercent ?? 0) > 0 ? `−${p.saleDiscountPercent}%` : p.salePrice ? "Akcija" : undefined,
+                  stock: p.stock,
+                  inStock: p.inStock,
+                }))}
+                total={total}
+                hasActiveFilters={hasActiveFilters}
+                resetHref={`/proizvodi?brendovi=${brendovi}`}
+                filterTrigger={
+                  <MobileFilterDrawer>
+                    <Suspense key="price"><PriceRangeFilter /></Suspense>
+                    <Suspense key="attr"><AttributeFilter attributes={facetedAttributes} selectedValues={selectedAttrEncoded} countsPerAttr={attrValueCounts} /></Suspense>
+                  </MobileFilterDrawer>
+                }
+                pagination={
+                  <Pagination currentPage={currentPage} totalPages={totalPages} buildHref={buildBrandHref} />
+                }
+              />
+            </div>
+          </Wrapper>
+        </div>
+      </div>
+    );
+  }
+
   // ── Category grid mode ───────────────────────────────────────────────────────
   const { data: allCategories } = await getCategories();
   const categories = allCategories.filter((cat) => cat.parentId === null);

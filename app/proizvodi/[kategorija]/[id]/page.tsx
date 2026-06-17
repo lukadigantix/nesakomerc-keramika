@@ -12,8 +12,8 @@ import { formatPrice } from "@/lib/utils";
 import { Suspense } from "react";
 import Loading from "./loading";
 
-async function RecommendedProducts({ productId, kategorijaSlug, categoryName }: { productId: string; kategorijaSlug: string; categoryName: string }) {
-  const products = (await getProductRecommended(productId, 16).catch(() => [])).filter((p) => p.inStock).slice(0, 8);
+async function RecommendedProducts({ productId, kategorijaSlug, categoryName, excludeIds }: { productId: string; kategorijaSlug: string; categoryName: string; excludeIds: string[] }) {
+  const products = (await getProductRecommended(productId, 16).catch(() => [])).filter((p) => p.inStock && !excludeIds.includes(p.id)).slice(0, 8);
   if (products.length === 0) return null;
   return (
     <ProductCarousel
@@ -26,6 +26,7 @@ async function RecommendedProducts({ productId, kategorijaSlug, categoryName }: 
         badge: (p.saleDiscountPercent ?? 0) > 0 ? `−${p.saleDiscountPercent}%` : p.salePrice ? "Akcija" : undefined,
         image: p.images[0] ?? "/images/img4.png",
         stock: p.stock,
+        inStock: p.inStock,
         href: `/proizvodi/${p.category?.slug ?? kategorijaSlug}/${p.slug}`,
       }))}
       subtitle="Izdvajamo"
@@ -311,6 +312,7 @@ async function ProizvodPageContent({
             badge: (p.clearanceDiscountPercent ?? 0) > 0 ? `−${p.clearanceDiscountPercent}%` : (p.saleDiscountPercent ?? 0) > 0 ? `−${p.saleDiscountPercent}%` : (p.clearancePrice || p.salePrice) ? "Akcija" : undefined,
             image: p.images[0] ?? "/images/img4.png",
             stock: p.stock,
+            inStock: p.inStock,
             href: `/proizvodi/${p.category?.slug ?? kategorija}/${p.slug}`,
           }))}
           subtitle={category.name}
@@ -322,7 +324,7 @@ async function ProizvodPageContent({
 
       {/* Recommended products carousel */}
       <Suspense>
-        <RecommendedProducts productId={product.id} kategorijaSlug={kategorija} categoryName={category.name} />
+        <RecommendedProducts productId={product.id} kategorijaSlug={kategorija} categoryName={category.name} excludeIds={[product.id, ...related.map((p) => p.id)]} />
       </Suspense>
     </div>
   );
