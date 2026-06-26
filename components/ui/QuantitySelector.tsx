@@ -10,8 +10,37 @@ import WishlistButton from "@/components/ui/WishlistButton";
 export interface VariantProduct {
   id: string;
   name: string;
-  image: string;
+  image?: string;
+  type?: string;
+  colorHex?: string;
   href: string;
+}
+
+const SERBIAN_COLORS: Record<string, string> = {
+  bela: "#ffffff", bijela: "#ffffff",
+  crna: "#111111",
+  siva: "#808080", siva_tamna: "#4b5563", siva_svetla: "#d1d5db",
+  crvena: "#dc2626",
+  plava: "#2563eb", tamno_plava: "#1e3a8a", svetlo_plava: "#60a5fa",
+  zelena: "#16a34a",
+  žuta: "#eab308", zuta: "#eab308",
+  narandžasta: "#f97316", narandzasta: "#f97316",
+  ljubičasta: "#9333ea", ljubicasta: "#9333ea",
+  roza: "#ec4899", roze: "#ec4899",
+  braon: "#92400e", smeđa: "#92400e", smedja: "#92400e",
+  bež: "#e8d5b7", bez: "#e8d5b7",
+  zlatna: "#f59e0b",
+  srebrna: "#9ca3af",
+  bela_sjaj: "#f8f8f8", bela_mat: "#f0f0f0",
+  antracit: "#374151",
+  hrast: "#8b5e3c", "hrast_svetli": "#c49a6c",
+};
+
+function resolveColor(name: string): string | null {
+  const key = name.toLowerCase().replace(/\s+/g, "_");
+  if (SERBIAN_COLORS[key]) return SERBIAN_COLORS[key];
+  if (/^#[0-9a-f]{3,8}$/i.test(name) || /^rgb/i.test(name)) return name;
+  return null;
 }
 
 interface Props {
@@ -55,31 +84,47 @@ export default function QuantitySelector({ product, variantProducts, stock, inSt
 
   return (
     <div className="flex flex-col gap-5 mt-2">
-      {/* Image-based variant swatches */}
+      {/* Variant swatches — image / color / text */}
       {variantProducts && variantProducts.length > 0 && (
         <div>
           <p className="text-sm font-medium text-zinc-950 mb-3">Varijante</p>
           <div className="flex flex-wrap gap-3">
-            {/* Current product — always shown first, highlighted */}
-            <div className="flex flex-col items-center gap-1.5 cursor-default">
-              <div className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-zinc-950">
-                <Image src={product.image} alt={product.name} fill className="object-cover" />
-              </div>
-              <span className="text-[10px] text-center leading-tight text-zinc-950 font-medium w-16 line-clamp-2">
-                {product.name}
-              </span>
-            </div>
             {variantProducts.map((v, i) => {
-              const inner = (
-                <>
+              const resolvedColor = v.colorHex ?? (v.type === "color" ? resolveColor(v.name) : null);
+              const isWhite = resolvedColor === "#ffffff" || resolvedColor === "#fff";
+
+              let swatch: React.ReactNode;
+              if (v.image) {
+                swatch = (
                   <div className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-zinc-200 hover:border-zinc-400 transition-colors duration-150">
                     <Image src={v.image} alt={v.name} fill className="object-cover" />
                   </div>
+                );
+              } else if (resolvedColor) {
+                swatch = (
+                  <div
+                    className={`w-10 h-10 rounded-full border-2 hover:border-zinc-500 transition-colors duration-150 shrink-0 ${isWhite ? "border-zinc-300" : "border-zinc-200"}`}
+                    style={{ backgroundColor: resolvedColor }}
+                    title={v.name}
+                  />
+                );
+              } else {
+                swatch = (
+                  <div className="h-10 px-3 rounded-lg border-2 border-zinc-200 hover:border-zinc-400 bg-white flex items-center justify-center transition-colors duration-150 min-w-[40px]">
+                    <span className="text-xs font-medium text-zinc-700 whitespace-nowrap">{v.name}</span>
+                  </div>
+                );
+              }
+
+              const inner = (
+                <>
+                  {swatch}
                   <span className="text-[10px] text-center leading-tight text-zinc-400 w-16 line-clamp-2">
                     {v.name}
                   </span>
                 </>
               );
+
               return v.href ? (
                 <Link key={i} href={v.href} className="flex flex-col items-center gap-1.5">
                   {inner}

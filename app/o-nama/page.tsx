@@ -4,8 +4,24 @@ import Wrapper from "@/components/layout/Wrapper";
 import { Users, Award, Layers, Clock } from "lucide-react";
 
 export const metadata = {
-  title: "O nama — Neša Komerc Keramika",
-  description: "Saznajte više o Neša Komerc Keramika — porodičnoj firmi specijalizovanoj za uređenje kupatila.",
+  title: "O nama — Porodična firma sa tradicijom od 15 godina",
+  description:
+    "Neša Komerc Keramika je porodična firma iz Svilajnca specijalizovana za prodaju keramike i kupatilske opreme. Više od 15 godina iskustva, 3.000+ zadovoljnih kupaca i 5.000+ proizvoda u salonu.",
+  alternates: { canonical: "/o-nama" },
+  openGraph: {
+    type: "website",
+    title: "O nama | Neša Komerc Keramika",
+    description:
+      "Porodična firma iz Svilajnca sa 15+ godina iskustva u prodaji keramike i kupatilske opreme. Pogledajte ko smo i šta nudimo.",
+    url: "/o-nama",
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Neša Komerc Keramika salon" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "O nama | Neša Komerc Keramika",
+    description: "Porodična firma iz Svilajnca sa 15+ godina iskustva u prodaji keramike i kupatilske opreme.",
+    images: ["/og-image.jpg"],
+  },
 };
 
 const stats = [

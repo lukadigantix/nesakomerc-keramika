@@ -7,7 +7,7 @@ import ProductTabs from "@/components/ui/ProductTabs";
 import QuantitySelector from "@/components/ui/QuantitySelector";
 import WishlistButton from "@/components/ui/WishlistButton";
 import ProductCarousel from "@/components/ui/ProductCarousel";
-import { getProductBySlug, getProducts, getProductRecommended } from "@/lib/api";
+import { getProductBySlug, getProductById, getProducts, getProductRecommended } from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
 import { Suspense } from "react";
 import Loading from "./loading";
@@ -37,17 +37,38 @@ async function RecommendedProducts({ productId, kategorijaSlug, categoryName, ex
   );
 }
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nesakomerckeramika.rs";
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ kategorija: string; id: string }>;
 }) {
-  const { id } = await params;
+  const { kategorija, id } = await params;
   try {
     const { data: product } = await getProductBySlug(id);
+    const rawDescription = product.shortDescription ?? product.description?.replace(/<[^>]*>/g, "").slice(0, 155) ?? product.name;
+    const description = `${rawDescription} — Kupite online uz brzu dostavu širom Srbije.`;
+    const image = product.images[0] ?? `${siteUrl}/og-image.jpg`;
+    const productUrl = `/proizvodi/${kategorija}/${product.slug}`;
+
     return {
-      title: `${product.name} — Neša Komerc Keramika`,
-      description: product.shortDescription ?? product.description ?? product.name,
+      title: `${product.name} — ${product.category?.name ?? "Keramika"}`,
+      description,
+      alternates: { canonical: productUrl },
+      openGraph: {
+        type: "website",
+        title: `${product.name} | Neša Komerc Keramika`,
+        description,
+        url: productUrl,
+        images: [{ url: image, width: 800, height: 800, alt: product.name }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${product.name} | Neša Komerc Keramika`,
+        description,
+        images: [image],
+      },
     };
   } catch {
     return {};
@@ -89,6 +110,22 @@ async function ProizvodPageContent({
   const relatedRes = await getProducts({ categoryId: category.id, limit: 20 });
   const related = relatedRes.data.filter((p) => p.id !== product.id && p.inStock).slice(0, 8);
 
+  // Fetch variant linked products by ID so we always get the correct href
+  const variantIds = product.variants
+    .map((v) => v.linkedProductId ?? v.productId)
+    .filter((id): id is string => Boolean(id));
+  const variantById: Record<string, typeof product> = {};
+  if (variantIds.length > 0) {
+    await Promise.all(
+      variantIds.map(async (vid) => {
+        try {
+          const res = await getProductById(vid);
+          variantById[vid] = res.data;
+        } catch {}
+      })
+    );
+  }
+
   const gallery = product.images.length > 0
     ? product.images
     : ["/images/img4.png", "/images/img4.png", "/images/img4.png", "/images/img4.png"];
@@ -112,8 +149,39 @@ async function ProizvodPageContent({
     ...product.specifications.map((s) => [s.key, s.value] as [string, string]),
   ];
 
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: gallery,
+    description: product.shortDescription ?? product.description?.replace(/<[^>]*>/g, "") ?? product.name,
+    sku: product.sku,
+    ...(product.brand && { brand: { "@type": "Brand", name: product.brand.name } }),
+    offers: {
+      "@type": "Offer",
+      url: `${siteUrl}/proizvodi/${kategorija}/${product.slug}`,
+      priceCurrency: "RSD",
+      price: parseFloat(product.clearancePrice ?? product.salePrice ?? product.price).toFixed(2),
+      availability: product.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      seller: { "@type": "Organization", name: "Neša Komerc Keramika" },
+    },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Početna", item: siteUrl },
+      { "@type": "ListItem", position: 2, name: "Svi proizvodi", item: `${siteUrl}/proizvodi` },
+      { "@type": "ListItem", position: 3, name: category.name, item: `${siteUrl}/proizvodi/${kategorija}` },
+      { "@type": "ListItem", position: 4, name: product.name, item: `${siteUrl}/proizvodi/${kategorija}/${product.slug}` },
+    ],
+  };
+
   return (
     <div className="pt-30 sm:pt-28 min-h-screen">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <Wrapper>
         {/* Breadcrumb */}
         <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400 mb-6 sm:mb-8">
@@ -225,21 +293,23 @@ async function ProizvodPageContent({
                 image: gallery[0],
                 sku: product.sku,
               }}
-              variantProducts={product.variants
-                .map((v) => {
-                  if (!v.imageUrl) return null;
-                  const match = v.productId
-                    ? related.find((p) => p.id === v.productId)
-                    : related.find((p) => p.name === v.name);
-                  return {
-                    id: v.name,
-                    name: v.name,
-                    image: v.imageUrl,
-                    href: match ? `/proizvodi/${match.category?.slug ?? kategorija}/${match.slug}` : "",
-                  };
-                })
-                .filter(Boolean) as { id: string; name: string; image: string; href: string }[]
-              }
+              variantProducts={product.variants.map((v) => {
+                const linkedId = v.linkedProductId ?? v.productId;
+                const match =
+                  linkedId
+                    ? (variantById[linkedId] ?? relatedRes.data.find((p) => p.id === linkedId))
+                    : (v.linkedProductName ?? v.name)
+                    ? relatedRes.data.find((p) => p.name === (v.linkedProductName ?? v.name))
+                    : undefined;
+                return {
+                  id: v.name,
+                  name: v.name,
+                  image: v.imageUrl ?? undefined,
+                  type: v.type ?? undefined,
+                  colorHex: v.colorHex ?? undefined,
+                  href: match ? `/proizvodi/${match.category?.slug ?? kategorija}/${match.slug}` : "",
+                };
+              })}
               stock={product.stock}
               inStock={product.inStock}
               productId={product.id}

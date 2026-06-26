@@ -1,6 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
+import Autoplay from "embla-carousel-autoplay";
 import Wrapper from "@/components/layout/Wrapper";
 import ProductCard from "@/components/ui/ProductCard";
 import {
@@ -30,6 +32,7 @@ interface Props {
   title: string;
   viewAllHref: string;
   viewAllLabel: string;
+  autoplay?: boolean;
 }
 
 export default function ProductCarousel({
@@ -38,14 +41,20 @@ export default function ProductCarousel({
   title,
   viewAllHref,
   viewAllLabel,
+  autoplay = false,
 }: Props) {
+  const autoplayPlugin = useRef(
+    Autoplay({ delay: 3500, stopOnInteraction: true, stopOnMouseEnter: true })
+  );
+
   if (items.length === 0) return null;
 
   return (
     <section className="py-12 lg:py-24 overflow-x-clip" style={{ backgroundColor: "#fafafa" }}>
       <Wrapper>
         <Carousel
-          opts={{ align: "start", loop: false }}
+          opts={{ align: "start", loop: true }}
+          plugins={autoplay ? [autoplayPlugin.current] : []}
           className="w-full"
         >
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 lg:mb-14 gap-4 sm:gap-0">

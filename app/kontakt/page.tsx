@@ -5,8 +5,24 @@ import { Map, MapMarker, MarkerContent } from "@/components/ui/map";
 import ContactForm from "@/components/ui/ContactForm";
 
 export const metadata = {
-  title: "Kontakt — Neša Komerc Keramika",
-  description: "Kontaktirajte Neša Komerc Keramika — posete salona, telefon, email i radno vreme.",
+  title: "Kontakt — Javite nam se, tu smo za vas",
+  description:
+    "Kontaktirajte Neša Komerc Keramika u Svilajncu. Telefon: +381 35 8814 077, email: office@nesa-komerc.com. Radno vreme: Pon–Pet 08–17h, Sub 09–14h. Stevana Sinđelića 309, Svilajnac.",
+  alternates: { canonical: "/kontakt" },
+  openGraph: {
+    type: "website",
+    title: "Kontakt | Neša Komerc Keramika",
+    description:
+      "Posetite nas u Svilajncu ili nas kontaktirajte telefonom i emailom. Radno vreme i lokacija na mapi.",
+    url: "/kontakt",
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Kontakt — Neša Komerc Keramika" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kontakt | Neša Komerc Keramika",
+    description: "Posetite nas u Svilajncu ili nas kontaktirajte telefonom i emailom.",
+    images: ["/og-image.jpg"],
+  },
 };
 
 export default function KontaktPage() {

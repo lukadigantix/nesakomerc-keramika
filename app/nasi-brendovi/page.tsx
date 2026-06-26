@@ -5,8 +5,24 @@ import { getActiveBrands } from "@/lib/api";
 import { ExternalLink } from "lucide-react";
 
 export const metadata = {
-  title: "Naši brendovi — Neša Komerc Keramika",
-  description: "Upoznajte se sa brendovima koje zastupamo — vrhunski proizvođači kupatilske opreme i keramike.",
+  title: "Naši brendovi — Vodeći svetski proizvođači keramike",
+  description:
+    "Neša Komerc Keramika zastupa 30+ vodećih svetskih brendova kupatilske opreme i keramike. Upoznajte se sa proizvođačima čije proizvode prodajemo.",
+  alternates: { canonical: "/nasi-brendovi" },
+  openGraph: {
+    type: "website",
+    title: "Naši brendovi — 30+ vodećih brendova | Neša Komerc Keramika",
+    description:
+      "Zastupamo 30+ vodećih svetskih brendova kupatilske opreme i keramike. Kvalitet koji stoji iza svakog proizvoda.",
+    url: "/nasi-brendovi",
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Naši brendovi — Neša Komerc Keramika" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Naši brendovi | Neša Komerc Keramika",
+    description: "Zastupamo 30+ vodećih svetskih brendova kupatilske opreme i keramike.",
+    images: ["/og-image.jpg"],
+  },
 };
 
 export default async function NasiBrendoviPage() {

@@ -60,7 +60,10 @@ export interface ApiProductVariant {
   name: string;
   type?: string;
   imageUrl?: string | null;
+  colorHex?: string | null;
   productId?: string | null;
+  linkedProductId?: string | null;
+  linkedProductName?: string | null;
 }
 
 export interface ApiProductSpec {
@@ -196,17 +199,11 @@ export async function getProducts(
 }
 
 export async function getProductById(id: string): Promise<ApiResponse<ApiProduct>> {
-  "use cache";
-  cacheLife("hours");
-
-  return apiFetch<ApiResponse<ApiProduct>>(`/products/${id}`).then(r => ({ ...r, data: fixProduct(r.data) }));
+  return apiFetch<ApiResponse<ApiProduct>>(`/products/${id}`, { cache: "no-store" }).then(r => ({ ...r, data: fixProduct(r.data) }));
 }
 
 export async function getProductBySlug(slug: string): Promise<ApiResponse<ApiProduct>> {
-  "use cache";
-  cacheLife("hours");
-
-  return apiFetch<ApiResponse<ApiProduct>>(`/products/slug/${slug}`).then(r => ({ ...r, data: fixProduct(r.data) }));
+  return apiFetch<ApiResponse<ApiProduct>>(`/products/slug/${slug}`, { cache: "no-store" }).then(r => ({ ...r, data: fixProduct(r.data) }));
 }
 
 export async function getProductRecommended(productId: string, limit = 8): Promise<ApiProduct[]> {
@@ -291,17 +288,11 @@ export async function getCategories(): Promise<ApiListResponse<ApiCategory>> {
 }
 
 export async function getCategoryTree(): Promise<ApiListResponse<ApiCategory>> {
-  "use cache";
-  cacheLife("days");
-
-  return apiFetch<ApiListResponse<ApiCategory>>("/categories/tree");
+  return apiFetch<ApiListResponse<ApiCategory>>("/categories/tree", { cache: "no-store" });
 }
 
 export async function getCategoryBySlug(slug: string): Promise<ApiResponse<ApiCategory>> {
-  "use cache";
-  cacheLife("days");
-
-  return apiFetch<ApiResponse<ApiCategory>>(`/categories/slug/${slug}`);
+  return apiFetch<ApiResponse<ApiCategory>>(`/categories/slug/${slug}`, { cache: "no-store" });
 }
 
 // ─── Brands ───────────────────────────────────────────────────────────────────
@@ -373,8 +364,5 @@ export async function getWorkingHoursDisplay(): Promise<ApiListResponse<WorkingH
 // ─── Attributes ───────────────────────────────────────────────────────────────
 
 export async function getAttributes(): Promise<ApiListResponse<ApiAttribute>> {
-  "use cache";
-  cacheLife("hours");
-
-  return apiFetch<ApiListResponse<ApiAttribute>>("/attributes");
+  return apiFetch<ApiListResponse<ApiAttribute>>("/attributes", { cache: "no-store" });
 }

@@ -12,6 +12,8 @@ import BrandFilter from "@/components/ui/BrandFilter";
 import MobileFilterDrawer from "@/components/ui/MobileFilterDrawer";
 import { Suspense } from "react";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nesakomerckeramika.rs";
+
 export async function generateMetadata({
   params,
 }: {
@@ -20,9 +22,29 @@ export async function generateMetadata({
   const { kategorija } = await params;
   try {
     const { data: category } = await getCategoryBySlug(kategorija);
+    const description = category.description
+      ? `${category.description.slice(0, 140)} — kupite online uz brzu dostavu.`
+      : `Pregledajte kompletan asortiman u kategoriji ${category.name}. Kupatilska oprema i keramika vodećih brendova uz brzu dostavu širom Srbije.`;
+    const image = category.imageUrl ?? `${siteUrl}/og-image.jpg`;
+    const categoryUrl = `/proizvodi/${kategorija}`;
+
     return {
-      title: `${category.name} — Neša Komerc Keramika`,
-      description: `Pregledajte naš asortiman u kategoriji ${category.name}.`,
+      title: `${category.name} — Keramika i kupatilska oprema`,
+      description,
+      alternates: { canonical: categoryUrl },
+      openGraph: {
+        type: "website",
+        title: `${category.name} | Neša Komerc Keramika`,
+        description,
+        url: categoryUrl,
+        images: [{ url: image, width: 800, height: 600, alt: category.name }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${category.name} | Neša Komerc Keramika`,
+        description,
+        images: [image],
+      },
     };
   } catch {
     return {};
@@ -203,8 +225,19 @@ export default async function KategorijaPage({
     }
   }
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Početna", item: siteUrl },
+      { "@type": "ListItem", position: 2, name: "Svi proizvodi", item: `${siteUrl}/proizvodi` },
+      { "@type": "ListItem", position: 3, name: category.name, item: `${siteUrl}/proizvodi/${kategorija}` },
+    ],
+  };
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#fafafa" }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       {/* Hero banner */}
       <div className="pt-28 pb-8" style={{ background: "linear-gradient(to right, #e11d1b, #f97316)" }}>
         <Wrapper>

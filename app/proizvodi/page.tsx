@@ -14,8 +14,24 @@ import { Search } from "lucide-react";
 import { Suspense } from "react";
 
 export const metadata = {
-  title: "Svi proizvodi — Neša Komerc Keramika",
-  description: "Pregledajte kompletan asortiman kupatilske opreme i keramike.",
+  title: "Svi proizvodi — Keramika i kupatilska oprema",
+  description:
+    "Pregledajte kompletan asortiman keramike i kupatilske opreme — pločice, sanitarije, baterije, kade, tuš kabine, ogledala i nameštaj. Preko 5.000 artikala sa brzom dostavom.",
+  alternates: { canonical: "/proizvodi" },
+  openGraph: {
+    type: "website",
+    title: "Svi proizvodi — Keramika i kupatilska oprema | Neša Komerc Keramika",
+    description:
+      "Kompletan asortiman keramike i kupatilske opreme. Preko 5.000 artikala vodećih brendova sa brzom dostavom.",
+    url: "/proizvodi",
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Svi proizvodi — Neša Komerc Keramika" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Svi proizvodi | Neša Komerc Keramika",
+    description: "Kompletan asortiman keramike i kupatilske opreme — over 5.000 artikala.",
+    images: ["/og-image.jpg"],
+  },
 };
 
 const PER_PAGE = 24;

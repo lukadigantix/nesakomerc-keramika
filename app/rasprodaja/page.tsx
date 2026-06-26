@@ -12,8 +12,24 @@ import MobileFilterDrawer from "@/components/ui/MobileFilterDrawer";
 import ProductGridClient from "@/components/ui/ProductGridClient";
 
 export const metadata = {
-  title: "Rasprodaja — Neša Komerc Keramika",
-  description: "Pogledajte proizvode na rasprodaji — najveći popusti na odabrane artikle.",
+  title: "Rasprodaja — Najveći popusti na keramiku i kupatilsku opremu",
+  description:
+    "Rasprodaja keramike, sanitarija, baterijа i kupatilske opreme po najnižim cenama. Ograničene količine — iskoristite prilike dok traju.",
+  alternates: { canonical: "/rasprodaja" },
+  openGraph: {
+    type: "website",
+    title: "Rasprodaja — Najveći popusti | Neša Komerc Keramika",
+    description:
+      "Rasprodaja keramike i kupatilske opreme po najnižim cenama. Ograničene količine — iskoristite prilike dok traju.",
+    url: "/rasprodaja",
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Rasprodaja — Neša Komerc Keramika" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rasprodaja | Neša Komerc Keramika",
+    description: "Rasprodaja keramike i kupatilske opreme po najnižim cenama.",
+    images: ["/og-image.jpg"],
+  },
 };
 
 const PER_PAGE = 24;

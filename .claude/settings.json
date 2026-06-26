@@ -4,7 +4,23 @@
       "Bash(node -e \"const next = require\\('/Users/aleksandar/Desktop/nesakomerckeramika-shop/nesakomerc-keramika/node_modules/next/package.json'\\); console.log\\(next.version\\)\")",
       "Bash(npx tsc *)",
       "Bash(xargs sed -i '' 's/Nesa Komerc Keramika/Neša Komerc Keramika/g')",
-      "Bash(python3 -m json.tool)"
+      "Bash(python3 -m json.tool)",
+      "Bash(npm install *)",
+      "Bash(mkdir -p /Users/aleksandar/Desktop/nesakomerckeramika-shop/nesakomerc-keramika/app/api/featured-products)",
+      "Bash(curl -s \"https://api.nesakomerckeramika.com/api/v1/products/slug/omaric-nica-60-grey-linni\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('data',{}\\).get\\('variants',[]\\), indent=2\\)\\)\")",
+      "Bash(curl -s \"https://api.nesakomerckeramika.com/api/v1/products?search=26500232\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(p['sku'], p['slug'], json.dumps\\(p.get\\('variants',[]\\)\\)\\) for p in d.get\\('data',[]\\)]\")",
+      "Bash(curl -s \"https://api.nesakomerckeramika.com/api/v1/products?limit=5&search=NICA+60\")",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s \"https://api.nesakomerckeramika.com/api/v1/products?limit=10&search=NICA+80\")",
+      "Bash(curl -s 'https://api.nesakomerckeramika.com/api/v1/categories/slug/kupatilski-namestaj')",
+      "Bash(curl -s \"https://api.nesakomerckeramika.com/api/v1/products?categoryId=$\\(curl -s 'https://api.nesakomerckeramika.com/api/v1/categories/slug/kupatilski-namestaj')",
+      "Bash(python3 -c \"from PIL import Image; img=Image.open\\('/Users/aleksandar/Desktop/nesakomerckeramika-shop/nesakomerc-keramika/public/og-image.jpg'\\); print\\(img.size\\)\")",
+      "Bash(sips -g pixelWidth -g pixelHeight /Users/aleksandar/Desktop/nesakomerckeramika-shop/nesakomerc-keramika/public/og-image.jpg)"
+    ],
+    "additionalDirectories": [
+      "/Users/aleksandar/Desktop/nesakomerckeramika-shop/nesakomerc-keramika/app/api"
     ]
   }
 }

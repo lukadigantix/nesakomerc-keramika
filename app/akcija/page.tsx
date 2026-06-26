@@ -13,8 +13,24 @@ import MobileFilterDrawer from "@/components/ui/MobileFilterDrawer";
 import ProductGridClient from "@/components/ui/ProductGridClient";
 
 export const metadata = {
-  title: "Mesečna akcija — Neša Komerc Keramika",
-  description: "Pogledajte proizvode na akciji ovog meseca.",
+  title: "Mesečna akcija — Popusti na keramiku i kupatilsku opremu",
+  description:
+    "Iskoristite mesečne akcije na keramiku, sanitarije, baterije, kade i tuš kabine. Pogledajte aktuelne popuste i uštedite na opremanju kupatila.",
+  alternates: { canonical: "/akcija" },
+  openGraph: {
+    type: "website",
+    title: "Mesečna akcija — Popusti do 50% | Neša Komerc Keramika",
+    description:
+      "Aktuelne akcije na keramiku i kupatilsku opremu. Iskoristite popuste i opremite kupatilo po najboljoj ceni.",
+    url: "/akcija",
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Mesečna akcija — Neša Komerc Keramika" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mesečna akcija | Neša Komerc Keramika",
+    description: "Aktuelne akcije na keramiku i kupatilsku opremu — iskoristite popuste.",
+    images: ["/og-image.jpg"],
+  },
 };
 
 const PER_PAGE = 24;

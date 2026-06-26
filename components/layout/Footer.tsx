@@ -271,9 +271,23 @@ export default function Footer({ categories, settings, workingHours }: { categor
       <div className="border-t border-white/15">
         <Wrapper>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-6 gap-3 sm:gap-4">
-            <p className="text-xs text-white/50">
-              © {new Date().getFullYear()} Neša Komerc Keramika. Sva prava zadržana.
-            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <p className="text-xs text-white/50">
+                © {new Date().getFullYear()} Neša Komerc Keramika. Sva prava zadržana.
+              </p>
+              <span className="hidden sm:inline text-white/20 text-xs">·</span>
+              <p className="text-xs text-white/35">
+                Design & Developed by{" "}
+                <a
+                  href="https://digantix.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/50 hover:text-white/80 transition-colors duration-150"
+                >
+                  Digantix
+                </a>
+              </p>
+            </div>
             <div className="flex items-center gap-6">
               {legal.map((item) => (
                 <Link
